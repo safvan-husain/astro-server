@@ -1,16 +1,16 @@
 import mongoose, { Schema } from "mongoose";
 
-const UserSchema = new Schema({
+const AstrologistSchema = new Schema({
   email: {
     type: String,
     required: true,
     unique: true,
   },
-  firstname: {
+  firstName: {
     type: String,
     required: true,
   },
-  lastname: {
+  lastName: {
     type: String,
     required: true,
   },
@@ -18,25 +18,24 @@ const UserSchema = new Schema({
     type: String,
     required: false,
   },
-  birthDate: {
+  description: {
     type: String,
     required: true,
   },
-  birthTime: {
+  astroType: {
     type: String,
+    enum: ["palmist", "kundali"],
     required: true,
   },
-  gender: {
-    type: String,
-    required: true,
+  rating: {
+    type: Number,
   },
-  accountType: {
-    type: String,
-    enum: ["gold", "silver", "normal"],
+  fees: {
+    type: Number,
     required: true,
   },
 });
 
-const User = mongoose.model("User", UserSchema);
+const Astrologist = mongoose.model("Astrologist", AstrologistSchema);
 
-export { User, UserSchema };
+export { Astrologist };

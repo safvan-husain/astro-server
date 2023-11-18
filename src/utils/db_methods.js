@@ -1,8 +1,9 @@
 // import { DataBaseException } from "../exception/exceptions";
 // import { Message, MessageModel } from "../model/message_model";
-import { User, UserSchema } from "../models/user_model.js"; 
+import { Astrologist } from "../models/astroligist_model.js";
 import { Password } from "./password_hash.js";
- 
+import { User } from "../models/user_model.js";
+
 // async function saveMessageDB(
 //   id,
 //   recieverUsername,
@@ -35,7 +36,6 @@ import { Password } from "./password_hash.js";
 //   }
 // }
 
-
 // async function deleteAllMessagesDB(id) {
 //   try {
 //     let user = await User.findById(id);
@@ -50,7 +50,6 @@ import { Password } from "./password_hash.js";
 //     throw new DataBaseException();
 //   }
 // }
-
 
 // async function getAllUnredMessagesDB(id){
 //   try {
@@ -67,26 +66,92 @@ import { Password } from "./password_hash.js";
 //     throw new DataBaseException();
 //   }
 // }
-async function registerUserDB(
+async function registerUserDB({
   email,
+  firstName,
+  lastName,
   password,
-) {
+  birthDate,
+  birthTime,
+  gender,
+}) {
+  let user;
+  if (password != null) {
+    var hash = await Password.hashPassword(password);
 
-    var hash =await Password.hashPassword(password);
+    user = new User({
+      email: email,
+      password: hash,
+      firstname: firstName,
+      lastname: lastName,
+      accountType: "normal",
+      birthDate: birthDate,
+      birthTime: birthTime,
+      gender: gender,
+    });
+  } else {
+    user = new User({
+      email: email,
+      password: hash,
+      firstname: firstName,
+      lastname: secondName,
+      accountType: "normal",
+      birthDate: birthDate,
+      birthTime: birthTime,
+      gender: gender,
+    });
+  }
 
-  let user = new User({
-    email: email,
-    password: hash,
-    firstname: "safvan",
-    lastname: "husain",
-    accountType: "normal", 
-  });
   try {
-    user.save();
+    await user.save();
     return user;
   } catch (error) {
     console.log(error);
     throw new DataBaseException();
+  }
+}
+
+async function saveAstrologistDB({
+  email,
+  firstName,
+  lastName,
+  password,
+  astroType,
+  fees,
+  discription,
+}) {
+  if (discription == null) {
+    throw "disc null here";
+  }
+  let astrologist;
+  if (password != null) {
+    var hash = await Password.hashPassword(password);
+
+    astrologist = new Astrologist({
+      email: email,
+      password: hash,
+      firstName: firstName,
+      lastName: lastName,
+      astroType: astroType,
+      fees: fees,
+      description: discription,
+    });
+  } else {
+    astrologist = new Astrologist({
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      astroType: astroType,
+      fees: fees,
+      description: discription,
+    });
+  }
+
+  try {
+    await astrologist.save();
+    return astrologist;
+  } catch (error) {
+    console.log(error);
   }
 }
 
@@ -102,8 +167,9 @@ async function registerUserDB(
 // }
 export {
   registerUserDB,
-//   deleteAllMessagesDB as deleteMessagesDB,
-//   saveMessageDB,
-//   getAllUnredMessagesDB,
-//   markMessagesReaded,
+  saveAstrologistDB,
+  //   deleteAllMessagesDB as deleteMessagesDB,
+  //   saveMessageDB,
+  //   getAllUnredMessagesDB,
+  //   markMessagesReaded,
 };

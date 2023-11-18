@@ -1,41 +1,28 @@
 export class WSEvent {
-    eventName;
-    // recieverUsername;
-    // senderUsername;
-    data;
-    // time;
-  
-    constructor(
-      eventName,
-      // recieverUsername,
-      // senderUsername,
-      data,
-      // time
-    ) {
-      this.eventName = eventName;
-      // this.recieverUsername = recieverUsername;
-      // this.senderUsername = senderUsername;
-      this.data = data;
-      // this.time = time;
-    }
-    static fromJson(jsonObject) {
-      var map = JSON.parse(jsonObject);
-      return new WSEvent(
-        map["eventName"],
-        // map["recieverUsername"],
-        // map["senderUsername"],
-        map["data"],
-        // map["time"]
-      );
-    }
-    ///used
-    toJson() {
-      return JSON.stringify({
-        eventName: this.eventName,
-        // recieverUsername: this.recieverUsername,
-        // senderUsername: this.senderUsername,
-        data: this.data,
-        // time: this.time,
-      });
-    }
+  message;
+  senderEmail;
+  recieverEmail;
+
+  constructor(message, senderEmail, recieverEmail) {
+    this.message = message;
+    this.senderEmail = senderEmail;
+    this.recieverEmail = recieverEmail;
   }
+
+  static fromJson(jsonObject) {
+    var map = JSON.parse(jsonObject);
+    return new WSEvent(
+      map["message"],
+      map["senderEmail"],
+      map["recieverEmail"]
+    );
+  }
+  ///used
+  toJson() {
+    return JSON.stringify({
+      message: this.message,
+      senderEmail: this.senderEmail,
+      recieverEmail: this.recieverEmail,
+    });
+  }
+}
