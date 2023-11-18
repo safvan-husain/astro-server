@@ -18,7 +18,7 @@ router.get("/all-astrologist", async (req, res) => {
   }
 });
 
-router.get("/user-details", async (req, res) => {
+router.post("/user-details", async (req, res) => {
   console.log("user-details called");
   const { email } = req.body;
 
@@ -28,6 +28,25 @@ router.get("/user-details", async (req, res) => {
       res
         .status(200)
         .json({ firstName: user.firstname, lastName: user.lastname });
+    } else {
+      res.status(400).json({ message: "No astrologist exist" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "server break" });
+  }
+});
+
+router.post("/astro-details", async (req, res) => {
+  console.log("astro-details called");
+  const { email } = req.body;
+
+  try {
+    var astro = await Astrologist.findOne({ email: email });
+    if (astro != null) {
+      res
+        .status(200)
+        .json(astro);
     } else {
       res.status(400).json({ message: "No astrologist exist" });
     }
