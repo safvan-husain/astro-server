@@ -1,33 +1,3 @@
-export class WSEvent {
-  message;
-  senderEmail;
-  recieverEmail;
-
-  constructor(message, senderEmail, recieverEmail) {
-    this.message = message;
-    this.senderEmail = senderEmail;
-    this.recieverEmail = recieverEmail;
-  }
-
-  static fromJson(jsonObject) {
-    var map = JSON.parse(jsonObject);
-    return new WSEvent(
-      map["message"],
-      map["senderEmail"],
-      map["recieverEmail"]
-    );
-  }
-  ///used
-  toJson() {
-    return JSON.stringify({
-      message: this.message,
-      senderEmail: this.senderEmail,
-      recieverEmail: this.recieverEmail,
-    });
-  }
-}
-
-// No need for import 'dart:convert'; as it's not applicable in JavaScript
 
 export const EventType = {
   message: "message",
@@ -44,50 +14,54 @@ export const CallState = {
 export class WSMessageModel {
   constructor({
     message,
-    senderEmail,
-    recieverEmail,
-    type = EventType.message,
+    senderphone,
+    recieverphone,
+    event_type = EventType.message,
     callState = CallState.none,
+    chatFee
   }) {
     this.message = message;
-    this.senderEmail = senderEmail;
-    this.recieverEmail = recieverEmail;
-    this.type = type;
+    this.senderphone = senderphone;
+    this.recieverphone = recieverphone;
+    this.event_type = event_type;
     this.callState = callState;
+    this.chatFee = chatFee;
   }
 
   toMap() {
     return {
       message: this.message,
-      senderEmail: this.senderEmail,
-      recieverEmail: this.recieverEmail,
+      chatFee: this.chatFee,
+      senderphone: this.senderphone,
+      recieverphone: this.recieverphone,
       callState: {
         completed: "completed",
         requested: "requested",
         sheduled: "sheduled",
         none: "none",
       }[this.callState],
-      type: {
+      event_type: {
         message: "message",
         call: "call",
-      }[this.type],
+      }[this.event_type],
     };
   }
 
   static fromMap(map) {
     return new WSMessageModel({
       message: map.message,
-      senderEmail: map.senderEmail,
-      recieverEmail: map.recieverEmail,
+      chatFee: map.chatFee,
+      senderphone: map.senderphone,
+      recieverphone: map.recieverphone,
       callState: {
         completed: CallState.completed,
         requested: CallState.requested,
         sheduled: CallState.sheduled,
       }[map.callState],
-      type: {
+      event_type: {
         message: EventType.message,
         call: EventType.call,
-      }[map.type],
+      }[map.event_type],
     });
   }
 

@@ -1,9 +1,14 @@
 import { server as WebSocketServer } from "websocket";
 import http from "http";
 // import { sendMessage, makeCall } from "./push_notification";
-import { WSEvent } from "./websocket_event.js";
-import { log } from "console";
-import { saveSendedMessage , saveUnSendedMessage} from "./database_message_methods.js";
+import { WSMessageModel, EventType } from "./websocket_event.js";
+import {
+  saveSendedMessage,
+  saveUnSendedMessage,
+} from "./database_message_methods.js";
+import { CallSchedule } from "../models/call_shedule_model.js";
+import { User } from "../models/user_model.js";
+import { Astrologist } from "../models/astroligist_model.js";
 // import { saveMessageDB } from "./data_base_methods";
 
 export function onWebSocket(server) {
@@ -32,22 +37,59 @@ export function onWebSocket(server) {
       // }
     }
 
-    connection.on("message", function (message) {
+    connection.on("message", async function (message) {
       if (message.type === "utf8") {
         console.log(message.utf8Data);
-        var ws_event = WSEvent.fromJson(message.utf8Data);
-        var receiver = webSockets[ws_event.recieverEmail];
-        if (receiver != null) {
-          saveSendedMessage(ws_event.message, ws_event.senderEmail, ws_event.recieverEmail);
-          receiver.sendUTF(message.utf8Data);
+        const obj = JSON.parse(message.utf8Data);
+        if (obj.share) { 
+          await Astrologist.recieveProfile(obj);
         } else {
-          console.log(ws_event.toJson());
-          saveUnSendedMessage(ws_event.message, ws_event.senderEmail, ws_event.recieverEmail);
-          console.log(`${ws_event.recieverEmail} is offline`);
+          var ws_event = WSMessageModel.fromJson(message.utf8Data);
+          if (ws_event.event_type == EventType.message) {
+            // console.log(ws_event.message);
+            var receiver = webSockets[ws_event.recieverphone];
+            if (receiver != null) {
+              saveSendedMessage(
+                ws_event.message,
+                ws_event.senderphone,
+                ws_event.recieverphone,
+                ws_event.chatFee
+              );
+              receiver.sendUTF(message.utf8Data);
+            } else {
+              saveUnSendedMessage(
+                ws_event.message,
+                ws_event.senderphone,
+                ws_event.recieverphone,
+                ws_event.chatFee
+              );
+              console.log(`${ws_event.recieverphone} is offline`);
+            }
+          } else {
+            // console.log(ws_event.message);
+            var receiver = webSockets[ws_event.recieverphone];
+            if (receiver != null) {
+              CallSchedule.createFromJson(ws_event.message, true)
+                .then((doc) => console.log("Document saved:", doc))
+                .catch((err) => console.error("Error saving document:", err));
+
+              console.log(`sending call to ${ws_event.recieverphone} `);
+              // saveSendedMessage(ws_event.message, ws_event.senderphone, ws_event.recieverphone);
+              receiver.sendUTF(message.utf8Data);
+            } else {
+              CallSchedule.createFromJson(ws_event.message, false)
+
+                .then((doc) => console.log("Document saved:", doc))
+                .catch((err) => console.error("Error saving document:", err));
+
+              // saveUnSendedMessage(ws_event.message, ws_event.senderphone, ws_event.recieverphone);
+              console.log(`${ws_event.recieverphone} is offline`);
+            }
+          }
         }
       }
     });
- 
+
     connection.on("close", function () {
       delete webSockets[userID];
       console.log("User Disconnected: " + userID);

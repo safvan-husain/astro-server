@@ -1,33 +1,64 @@
 import { Router } from "express";
 import { Astrologist } from "../models/astroligist_model.js";
-import { saveAstrologistDB } from "../utils/db_methods.js";
+// import { saveAstrologistDB } from "../utils/db_methods.js";
 const router = Router();
 
 router.post("/login-astro", async (req, res) => {
   console.log("login astro");
   try {
-    const { email, password } = req.body;
-    var astrologist = await Astrologist.findOne({ email: email });
+    const { phone, password } = req.body;
+    var astrologist = await Astrologist.findOne({ phone: phone });
+    
     if (astrologist == null) {
-      res.status(409).json({ message: "No account exist with this email" });
+      res.status(409).json({ message: "No account exist with this phone" });
     } else {
-      res.status(200).json(astrologist);
+      if(astrologist.adminApprovel === false) {
+        res.status(409).json({ message: "Not yet Approved by admin"})
+      }else {
+        res.status(200).json(astrologist);
+      }
     }
+    
   } catch (error) {
     res.status(500).json({ message: "Oops! server failed!" });
   }
 });
 
+router.post("verify-phone", async (req, res) => {
+  const { phone } = req.body;
+  //send otp;
+});
+
 router.post("/register-astro", async (req, res) => {
-  console.log("register astro called");
-  const { email } = req.body;
+  var otp = req.query.otp;
+  if (otp !== "0000") {
+    res.status(401).json({ message: "wrong otp" });
+  } else {
+    try {
+      var astrologist = await Astrologist.findOne({ phone: req.body.phone });
+      if (astrologist == null) {
+        astrologist = await Astrologist.createProfile(req.body);
+        res.status(200).json(astrologist);
+      } else {
+        res.status(400).json({ message: "Astrologist exist with this phone!" });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "server break" });
+    }
+  }
+});
+
+router.post("/edit-astro", async (req, res) => {
   try {
-    var astrologist = await Astrologist.findOne({ email: email });
-    if (astrologist == null) {
-      astrologist = await saveAstrologistDB(req.body);
+    var astrologist = await Astrologist.findOne({ phone: req.body.phone });
+    if (astrologist != null) {
+      astrologist = await astrologist.updateProfile(req.body);
       res.status(200).json(astrologist);
     } else {
-      res.status(400).json({ message: "Astrologist exist with this email!" });
+      res
+        .status(400)
+        .json({ message: "Astrologist do not exist with this phone!" });
     }
   } catch (error) {
     console.log(error);
@@ -35,42 +66,42 @@ router.post("/register-astro", async (req, res) => {
   }
 });
 
-router.post("/login-firebase-astro", async (req, res) => {
-  console.log("login firebase astro called");
-  const { email } = req.body;
-  var astrologist = await Astrologist.findOne({ email: email });
-  if (astrologist == null) {
-    res.status(409).json({ message: "No account exist with this email" });
-  } else {
-    res.status(200).json(Astrologist);
-  }
-});
-router.post("/register-firebase-astro", async (req, res) => {
-  console.log("register firebase astro called");
-  const {
-    firstName,
-    lastName,
-    email,
-    birthDate,
-    birthTime,
-    // birthPlace,
-    gender,
-  } = req.body;
-  try {
-    var astrologist = await Astrologist.findOne({ email: email });
-    if (astrologist == null) {
-      astrologist = await saveAstrologistDB(req.body);
-      res.status(200).json(Astrologist);
-    } else {
-      res.status(400).json({ message: email + " Astrologist exist" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "server break" });
-  }
-});
+// router.post("/login-firebase-astro", async (req, res) => {
+//   console.log("login firebase astro called");
+//   const { phone } = req.body;
+//   var astrologist = await Astrologist.findOne({ phone: phone });
+//   if (astrologist == null) {
+//     res.status(409).json({ message: "No account exist with this phone" });
+//   } else {
+//     res.status(200).json(Astrologist);
+//   }
+// });
+// router.post("/register-firebase-astro", async (req, res) => {
+//   console.log("register firebase astro called");
+//   const {
+//     firstName,
+//     lastName,
+//     phone,
+//     birthDate,
+//     birthTime,
+//     // birthPlace,
+//     gender,
+//   } = req.body;
+//   try {
+//     var astrologist = await Astrologist.findOne({ phone: phone });
+//     if (astrologist == null) {
+//       astrologist = await saveAstrologistDB(req.body);
+//       res.status(200).json(Astrologist);
+//     } else {
+//       res.status(400).json({ message: phone + " Astrologist exist" });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ message: "server break" });
+//   }
+// });
 
-router.post("/guru-register", (req, res) => {
-  const { astrologistname, password } = req.body;
-});
+// router.post("/guru-register", (req, res) => {
+//   const { astrologistname, password } = req.body;
+// });
 
 export { router as astrologistAuthRoute };

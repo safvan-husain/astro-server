@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 const UserSchema = new Schema({
-  email: {
+  phone: {
     type: String,
     required: true,
     unique: true,
@@ -26,16 +26,58 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+   avatarUrl: {
+    type: String,
+    required: false,
+  },
   gender: {
     type: String,
     required: true,
   },
-  accountType: {
+  maritalStatus: {
     type: String,
-    enum: ["gold", "silver", "normal"],
+    enum: ["single", "married", "divorced", "notSpecified"],
     required: true,
   },
+  balance: {
+    required: true,
+    type: Number,
+  }
 });
+
+UserSchema.methods.updateProfile = function (data) {
+  Object.assign(this, data);
+  return this.save();
+};
+
+UserSchema.methods.deductFromBalance = function(amount) {
+  if (this.balance < amount) {
+    throw new Error('Insufficient balance');
+  }
+  this.balance -= amount;
+  return this.save();
+};
+
+UserSchema.methods.getProfile = function() {
+  var obj = this.toObject();
+  delete obj.password;
+  delete obj.phone;
+  delete obj.balance;
+  return JSON.stringify(obj);
+};
+
+UserSchema.methods.increaseBalance = function(amount) {
+  if (this.balance < amount) {
+    throw new Error('Insufficient balance');
+  }
+  this.balance += amount;
+  return this.save();
+};
+
+UserSchema.statics.createProfile = function (data) {
+  const user = new this(data);
+  return user.save();
+};
 
 const User = mongoose.model("User", UserSchema);
 

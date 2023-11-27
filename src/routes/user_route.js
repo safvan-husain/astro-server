@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { Astrologist } from "../models/astroligist_model.js";
 import { User } from "../models/user_model.js";
+import { save } from "../../test.js";
 const router = Router();
 
 router.get("/all-astrologist", async (req, res) => {
   console.log("as astro called");
+  // await save();
   try {
     var astrologists = await Astrologist.find();
     if (astrologists != null) {
