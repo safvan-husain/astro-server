@@ -57,13 +57,14 @@ export function onWebSocket(server) {
               );
               receiver.sendUTF(message.utf8Data);
             } else {
+              console.log(`${ws_event.recieverphone} is offline`);
               saveUnSendedMessage(
                 ws_event.message,
                 ws_event.senderphone,
                 ws_event.recieverphone,
                 ws_event.chatFee
               );
-              console.log(`${ws_event.recieverphone} is offline`);
+              
             }
           } else {
             // console.log(ws_event.message);

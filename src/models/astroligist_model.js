@@ -1,90 +1,177 @@
 import mongoose, { Schema, Types } from "mongoose";
 import { User } from "./user_model.js";
+import { PushNotification } from "../utils/push_notfication.js";
 
-const AstrologistSchema = new Schema({
-  phone: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  firstName: {
-    type: String,
-    required: true,
-  },
-  lastName: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: false,
-  },
-  avatarUrl: {
-    type: String,
-    required: false,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  specialities: {
-    type: [String],
-    required: true,
-  },
-  languages: {
-    type: [String],
-    required: true,
-  },
-  chatFees: {
-    type: Number,
-    required: true,
-  },
-  callFees: {
-    type: Number,
-    required: true,
-  },
-  earnings: {
-    type: Number,
-    required: true,
-  },
-  collected: {
-    type: Number,
-    required: true,
-  },
-  adminApprovel: {
-    type: Boolean,
-    default: false,
-  },
-  userModelIds: [
-    {
+const AstrologistSchema = new Schema(
+  {
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: false,
+    },
+    avatarUrl: {
+      type: String,
+      required: false,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    specialities: {
+      type: [String],
+      required: true,
+    },
+    languages: {
+      type: [String],
+      required: true,
+    },
+    chatFees: {
+      type: Number,
+      required: true,
+    },
+    callFees: {
+      type: Number,
+      required: true,
+    },
+    earnings: {
+      type: Number,
+      required: true,
+    },
+    collected: {
+      type: Number,
+      required: true,
+    },
+    adminApprovel: {
+      type: Boolean,
+      default: false,
+    },
+    userModelIds: [
+      {
+        type: String,
+      },
+    ],
+    token: {
       type: String,
     },
-  ],
+    ratings: [
+      {
+        userPhone: {
+          type: String,
+          required: true,
+        },
+        rating: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+AstrologistSchema.statics.addRating = async function ({
+  userPhone,
+  astroPhone,
+  rating,
+}) {
+  const astrologist = await this.findOne({ phone: astroPhone });
+  if (astrologist != null) {
+    const userRating = astrologist.ratings.find(
+      (r) => r.userPhone === userPhone
+    );
+
+    if (userRating) {
+      userRating.rating = rating;
+    } else {
+      astrologist.ratings.push({ userPhone, rating });
+    }
+
+    await astrologist.save();
+  }
+};
+
+AstrologistSchema.virtual("averageRating").get(function () {
+  if (this.ratings.length === 0) {
+    return 0;
+  }
+  const sum = this.ratings.reduce((total, rating) => total + rating.rating, 0);
+  return sum / this.ratings.length;
 });
+
+AstrologistSchema.statics.updateToken = async function (data) {
+  const { phone, token } = data;
+  if (token != null) {
+    const astrologist = await this.findOne({ phone: phone });
+    astrologist.token = token;
+    await astrologist.save();
+  } else {
+    console.log("token is null astro scema");
+  }
+};
+
+AstrologistSchema.methods.NotifyMessage = async function (title, content) {
+  const pushNotification = new PushNotification();
+  await pushNotification.sendMessage({
+    token: this.token,
+    title: title,
+    message: content,
+  });
+};
 
 AstrologistSchema.statics.getTotalEarningsAndCollected = async function () {
   const astrologists = await this.find({});
   let totalEarnings = 0;
   let totalCollected = 0;
 
-  astrologists.forEach(astrologist => {
+  astrologists.forEach((astrologist) => {
     totalEarnings += astrologist.earnings;
     totalCollected += astrologist.collected;
   });
 
   return {
     totalEarnings,
-    totalCollected
+    totalCollected,
   };
 };
 
+AstrologistSchema.statics.updateToken = async function (data) {
+  const { phone, token } = data;
+  if (token != null) {
+    console.log("token recieved");
+    console.log(token);
+    const astro = await this.findOne({ phone: phone });
+    if (astro != null) {
+      astro.token = token;
+      await astro.save();
+      console.log("token refreshed for a astro");
+    }
+  } else {
+    console.log("no token in astromodel");
+  }
+};
 
-AstrologistSchema.methods.increaseEarnings = function (amount) {
+AstrologistSchema.methods.increaseEarnings = function (amou) {
+  var amount = parseFloat(amou);
   this.earnings += amount;
   return this.save();
 };
 
-AstrologistSchema.method.publicDetails = function () {
+AstrologistSchema.methods.publicDetails = function () {
   var obj = this.toObject();
   delete obj.password;
   delete obj.phone;

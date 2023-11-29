@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { PushNotification } from "../utils/push_notfication.js";
 
 const UserSchema = new Schema({
   phone: {
@@ -26,7 +27,7 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
-   avatarUrl: {
+  avatarUrl: {
     type: String,
     required: false,
   },
@@ -42,34 +43,69 @@ const UserSchema = new Schema({
   balance: {
     required: true,
     type: Number,
+  },
+  token: {
+    type: String,
+  },
+  isSubscribed : {
+    type: Boolean,
+    required: true,
   }
 });
+
+UserSchema.methods.NotifyMessage = async function (title, content) {
+  const pushNotification = new PushNotification();
+  await pushNotification.sendMessage({
+    token: this.token,
+    title: title,
+    message: content,
+  });
+};
+
+UserSchema.statics.updateToken = async function (data) {
+  const { phone, token } = data;
+  if (token != null) {
+    console.log("token recieved");
+    console.log(token);
+    const user = await this.findOne({ phone: phone });
+    if (user != null) {
+      user.token = token;
+      await user.save();
+      console.log("token refreshed for a user");
+    }
+  } else {
+    console.log("no token in usermodel");
+  }
+};
 
 UserSchema.methods.updateProfile = function (data) {
   Object.assign(this, data);
   return this.save();
 };
 
-UserSchema.methods.deductFromBalance = function(amount) {
+UserSchema.methods.deductFromBalance = function (amou) {
+  var amount = parseFloat(amou);
   if (this.balance < amount) {
-    throw new Error('Insufficient balance');
+    throw new Error("Insufficient balance");
   }
+  console.log(`before deducting ${amou}`);
   this.balance -= amount;
   return this.save();
 };
 
-UserSchema.methods.getProfile = function() {
+UserSchema.methods.getProfile = function () {
   var obj = this.toObject();
   delete obj.password;
   delete obj.phone;
   delete obj.balance;
+  delete obj.avatarUrl;
+  delete obj._id;
+  delete obj.__v;
   return JSON.stringify(obj);
 };
 
-UserSchema.methods.increaseBalance = function(amount) {
-  if (this.balance < amount) {
-    throw new Error('Insufficient balance');
-  }
+UserSchema.methods.increaseBalance = function (amou) {
+  var amount = parseFloat(amou);
   this.balance += amount;
   return this.save();
 };

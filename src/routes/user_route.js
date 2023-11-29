@@ -8,8 +8,9 @@ router.get("/all-astrologist", async (req, res) => {
   console.log("as astro called");
   // await save();
   try {
-    var astrologists = await Astrologist.find();
+    var astrologists = await Astrologist.find({ adminApprovel: true });
     if (astrologists != null) {
+      console.log(astrologists); 
       res.status(200).json(astrologists);
     } else {
       res.status(400).json({ message: "No astrologist exist" });
@@ -19,6 +20,16 @@ router.get("/all-astrologist", async (req, res) => {
     res.status(500).json({ message: "server break" });
   }
 });
+
+router.post("/rate-astrologist",async (req, res) => {
+  try {
+    await Astrologist.addRating(req.body);
+    res.status(200)
+  } catch (error) {
+    console.log(error);
+    res.status(500)
+  }
+})
 
 router.post("/user-details", async (req, res) => {
   console.log("user-details called");
