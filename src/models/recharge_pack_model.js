@@ -19,7 +19,6 @@ rechargePackSchema.statics.fromJSON = async function (json) {
   return pack;
 };
 
-
 const RechargePack = mongoose.model("RechargePack", rechargePackSchema);
 
 export { RechargePack };

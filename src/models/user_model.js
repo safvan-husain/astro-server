@@ -104,15 +104,15 @@ UserSchema.methods.getProfile = function () {
   return JSON.stringify(obj);
 };
 
-UserSchema.methods.increaseBalance = function (amou) {
+UserSchema.methods.increaseBalance = async function (amou) {
   var amount = parseFloat(amou);
   this.balance += amount;
-  return this.save();
+  return await this.save();
 };
 
-UserSchema.statics.createProfile = function (data) {
+UserSchema.statics.createProfile =async function (data) {
   const user = new this(data);
-  return user.save();
+  return await user.save();
 };
 
 const User = mongoose.model("User", UserSchema);

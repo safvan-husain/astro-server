@@ -3,16 +3,16 @@ import { RechargePack } from '../models/recharge_pack_model.js'
 import { User } from '../models/user_model.js';
 const router = Router();
 
-router.get("/un-approved", async (req, res) => {
-    console.log("unapproved called");
+router.get("/all-astrologist", async (req, res) => {
     try {
-        var astrologist = await Astrologist.find({ adminApprovel: false})
+        var astrologist = await Astrologist.find()
         console.log(astrologist);
         res.status(200).json(astrologist);
     } catch (error) {
-        res.status(500).json(JSON.stringify({ message: "database error"}));
+        res.status(500).json({ message: "database error"});
     }
 })
+
 router.get("/all-user", async (req, res) => {
     console.log("all-user called");
     try {
@@ -20,7 +20,7 @@ router.get("/all-user", async (req, res) => {
         console.log(astrologist);
         res.status(200).json(astrologist);
     } catch (error) {
-        res.status(500).json(JSON.stringify({ message: "database error"}));
+        res.status(500).json({ message: "database error"});
     }
 })
 router.get("/details", async (req, res) => {
@@ -40,10 +40,10 @@ router.get("/details", async (req, res) => {
         obj["totalEarnings"] = total.totalEarnings;
         obj["totalCollected"] = total.totalCollected;
         
-        res.status(200).json(JSON.stringify(obj));
+        res.status(200).json(obj); 
     } catch (error) {
         console.log(error);
-        res.status(500).json(JSON.stringify({ message: "database error"}));
+        res.status(500).json({ message: "database error"}); 
     }
 })
 
@@ -55,7 +55,7 @@ router.post("/approve", async (req, res) => {
         astrologist.adminApprovel = true;
         await astrologist.save(); 
     } catch (error) {
-        res.status(500).json(JSON.stringify({ message: "database error"}));
+        res.status(500).json({ message: "database error"});
     }
 })
 
