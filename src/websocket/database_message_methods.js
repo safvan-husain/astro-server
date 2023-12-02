@@ -78,4 +78,4 @@ const saveUnSendedMessage = async (message, sender, reciever, chatFee) => {
   }
 };
 
-export { saveSendedMessage, saveUnSendedMessage };
+// export { saveSendedMessage, saveUnSendedMessage };

@@ -10,7 +10,6 @@ router.get("/all-astrologist", async (req, res) => {
   try {
     var astrologists = await Astrologist.find({ adminApprovel: true });
     if (astrologists != null) {
-      console.log(astrologists); 
       res.status(200).json(astrologists);
     } else {
       res.status(400).json({ message: "No astrologist exist" });

@@ -165,10 +165,15 @@ AstrologistSchema.statics.updateToken = async function (data) {
   }
 };
 
-AstrologistSchema.methods.increaseEarnings = function (amou) {
-  var amount = parseFloat(amou);
-  this.earnings += amount;
-  return this.save();
+AstrologistSchema.methods.increaseEarnings = async function () {
+  this.earnings += this.chatFees;
+  return await this.save();
+};
+
+AstrologistSchema.methods.decreaseAChatFee = async function () {
+
+  this.earnings -= this.chatFees;
+  return await this.save();
 };
 
 AstrologistSchema.methods.publicDetails = function () {

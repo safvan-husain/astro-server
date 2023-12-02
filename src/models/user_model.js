@@ -78,6 +78,14 @@ UserSchema.statics.updateToken = async function (data) {
   }
 };
 
+UserSchema.statics.isUser = async function( phone ) {
+  var user = await this.findOne({ phone: phone})
+  if(user!= null) {
+    return true;
+  }
+  return false;
+}
+
 UserSchema.methods.updateProfile = function (data) {
   Object.assign(this, data);
   return this.save();

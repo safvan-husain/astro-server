@@ -3,7 +3,7 @@ import { RechargePack } from '../models/recharge_pack_model.js'
 import { User } from '../models/user_model.js';
 const router = Router();
 
-router.get("/all-astrologist", async (req, res) => {
+router.get("/astrologist-all", async (req, res) => {
     try {
         var astrologist = await Astrologist.find()
         console.log(astrologist);

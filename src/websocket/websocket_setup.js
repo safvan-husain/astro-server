@@ -2,19 +2,23 @@ import { server as WebSocketServer } from "websocket";
 import http from "http";
 // import { sendMessage, makeCall } from "./push_notification";
 import { WSMessageModel, EventType } from "./websocket_event.js";
-import {
-  saveSendedMessage,
-  saveUnSendedMessage,
-} from "./database_message_methods.js";
+import { Message } from "../models/message_model.js";
+// import {
+//   saveSendedMessage,
+//   saveUnSendedMessage,
+// } from "./database_message_methods.js";
 import { CallSchedule } from "../models/call_shedule_model.js";
 import { User } from "../models/user_model.js";
 import { Astrologist } from "../models/astroligist_model.js";
+import { MessageReplayTracker } from "./message_replay_tracker.js";
 // import { saveMessageDB } from "./data_base_methods";
 
 export function onWebSocket(server) {
   var webSockets = {};
   var connected_devices = [];
-
+  var messageTracker = new MessageReplayTracker()
+  
+  setInterval(()=> { messageTracker.removeUnReplayed() }, 10000)
   const wsServer = new WebSocketServer({
     httpServer: server,
   });
@@ -41,30 +45,28 @@ export function onWebSocket(server) {
       if (message.type === "utf8") {
         console.log(message.utf8Data);
         const obj = JSON.parse(message.utf8Data);
-        if (obj.share) { 
+        if (obj.share) {
           await Astrologist.recieveProfile(obj);
         } else {
           var ws_event = WSMessageModel.fromJson(message.utf8Data);
           if (ws_event.event_type == EventType.message) {
+            await messageTracker.onNewMessageOnWS(ws_event);
             // console.log(ws_event.message);
             var receiver = webSockets[ws_event.recieverphone];
             if (receiver != null) {
-              saveSendedMessage(
+              await Message.saveSendedMessage(
                 ws_event.message,
                 ws_event.senderphone,
-                ws_event.recieverphone,
-                ws_event.chatFee
+                ws_event.recieverphone
               );
               receiver.sendUTF(message.utf8Data);
             } else {
               console.log(`${ws_event.recieverphone} is offline`);
-              saveUnSendedMessage(
+             await Message.saveUnSendedMessage(
                 ws_event.message,
                 ws_event.senderphone,
-                ws_event.recieverphone,
-                ws_event.chatFee
+                ws_event.recieverphone
               );
-              
             }
           } else {
             // console.log(ws_event.message);
@@ -111,4 +113,5 @@ export function onWebSocket(server) {
 
     // connection.sendUTF(JSON.stringify({ cmd: "connected" }));
   });
+
 }

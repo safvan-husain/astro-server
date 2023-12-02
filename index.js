@@ -49,6 +49,8 @@ app.use(adminRouter );
 //   // handle error
 // })
 
+// setInterval(()=> { console.log("on interval")}, 10000) 
+
 mongoose
   .connect(DB, { useNewUrlParser: true })   
   .then(() => {
@@ -59,11 +61,11 @@ mongoose
   });
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Hello World!"); 
 });
 
 server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
 
-onWebSocket(server);
+onWebSocket(server);  

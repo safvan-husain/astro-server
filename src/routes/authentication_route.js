@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { User } from "../models/user_model.js";
+import { Password } from "../utils/password_hash.js";
 // import { registerUserDB } from "../utils/db_methods.js";
 const router = Router();
 
@@ -10,7 +11,31 @@ router.post("/login", async (req, res) => {
     if (user == null) {
       res.status(409).json({ message: "No account exist with this phone" });
     } else {
-      await User.updateToken(req.body);
+      if(Password.comparePasswords(password, user.password)) {
+        await User.updateToken(req.body);
+
+      res.status(200).json(user);
+      } else {
+        res.status(400).json({ message: "Incorrect Password" });
+      }
+      
+    }
+  } catch (error) {
+    res.status(509).json({ message: "server crash" });
+    console.log(error);
+  }
+
+  // Authentication logic here
+});
+
+router.get("/log-latest", async (req, res) => {
+  const { phone } = req.query;
+  try {
+    var user = await User.findOne({ phone: phone });
+    if (user == null) {
+      res.status(409).json({ message: "No account exist with this phone" });
+    } else {
+      // await User.updateToken(req.body);
       res.status(200).json(user);
     }
   } catch (error) {
