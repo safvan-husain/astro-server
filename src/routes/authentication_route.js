@@ -11,7 +11,7 @@ router.post("/login", async (req, res) => {
     if (user == null) {
       res.status(409).json({ message: "No account exist with this phone" });
     } else {
-      if(Password.comparePasswords(password, user.password)) {
+      if(await Password.comparePasswords(password, user.password)) { 
         await User.updateToken(req.body);
 
       res.status(200).json(user);

@@ -13,18 +13,20 @@ router.post("/login-astro", async (req, res) => {
     if (astrologist == null) {
       res.status(409).json({ message: "No account exist with this phone" });
     } else {
-      if (Password.comparePasswords(password, user.password)) {
-        await Astrologist.updateToken(req.body);
-        if (astrologist.adminApprovel === false) {
-          res.status(409).json({ message: "Not yet Approved by admin" });
-        } else {
-          res.status(200).json(astrologist);
-        }
+      // if (await Password.comparePasswords(password, astrologist.password)) {
+      //   await Astrologist.updateToken(req.body);
+
+      // } else {
+      //   res.status(400).json({ message: "Incorrect Password" });
+      // }
+      if (astrologist.adminApprovel === false) {
+        res.status(409).json({ message: "Not yet Approved by admin" });
       } else {
-        res.status(400).json({ message: "Incorrect Password" });
+        res.status(200).json(astrologist);
       }
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Oops! server failed!" });
   }
 });
