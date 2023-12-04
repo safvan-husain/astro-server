@@ -86,19 +86,23 @@ UserSchema.statics.isUser = async function( phone ) {
   return false;
 }
 
-UserSchema.methods.updateProfile = function (data) {
+UserSchema.methods.updateProfile = async function (data) {
   Object.assign(this, data);
-  return this.save();
+  return await this.save();
 };
 
-UserSchema.methods.deductFromBalance = function (amou) {
+UserSchema.methods.deductFromBalance =async function (amou) {
   var amount = parseFloat(amou);
   if (this.balance < amount) {
     throw new Error("Insufficient balance");
   }
-  console.log(`before deducting ${amou}`);
+  // console.log(`before deducting ${amou} from ${this.firstname}`);
   this.balance -= amount;
-  return this.save();
+  console.log(`after deducting ${amou} : ${this.balance} from ${this.firstname}`);
+  const result = await this.save();
+  console.log("Save result:", result);
+  
+  return result; 
 };
 
 UserSchema.methods.getProfile = function () {

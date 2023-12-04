@@ -19,6 +19,7 @@ export function onWebSocket(server) {
   var messageTracker = new MessageReplayTracker()
   
   setInterval(()=> { messageTracker.removeUnReplayed() }, 10000)
+
   const wsServer = new WebSocketServer({
     httpServer: server,
   });
