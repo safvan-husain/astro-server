@@ -1,7 +1,7 @@
 import { server as WebSocketServer } from "websocket";
 import http from "http";
 // import { sendMessage, makeCall } from "./push_notification";
-import { WSMessageModel, EventType } from "./websocket_event.js";
+import { WSMessageModel } from "./websocket_event.js"; 
 import { Message } from "../models/message_model.js";
 // import {
 //   saveSendedMessage,
@@ -50,7 +50,7 @@ export function onWebSocket(server) {
           await Astrologist.recieveProfile(obj);
         } else {
           var ws_event = WSMessageModel.fromJson(message.utf8Data);
-          if (ws_event.event_type == EventType.message) {
+          // if (ws_event.event_type == EventType.message) {
             await messageTracker.onNewMessageOnWS(ws_event);
             // console.log(ws_event.message);
             var receiver = webSockets[ws_event.recieverphone];
@@ -69,27 +69,27 @@ export function onWebSocket(server) {
                 ws_event.recieverphone
               );
             }
-          } else {
-            // console.log(ws_event.message);
-            var receiver = webSockets[ws_event.recieverphone];
-            if (receiver != null) {
-              CallSchedule.createFromJson(ws_event.message, true)
-                .then((doc) => console.log("Document saved:", doc))
-                .catch((err) => console.error("Error saving document:", err));
+          // } else {
+          //   // console.log(ws_event.message);
+          //   var receiver = webSockets[ws_event.recieverphone];
+          //   if (receiver != null) {
+          //     CallSchedule.createFromJson(ws_event.message, true)
+          //       .then((doc) => console.log("Document saved:", doc))
+          //       .catch((err) => console.error("Error saving document:", err));
 
-              console.log(`sending call to ${ws_event.recieverphone} `);
-              // saveSendedMessage(ws_event.message, ws_event.senderphone, ws_event.recieverphone);
-              receiver.sendUTF(message.utf8Data);
-            } else {
-              CallSchedule.createFromJson(ws_event.message, false)
+          //     console.log(`sending call to ${ws_event.recieverphone} `);
+          //     // saveSendedMessage(ws_event.message, ws_event.senderphone, ws_event.recieverphone);
+          //     receiver.sendUTF(message.utf8Data);
+          //   } else {
+          //     CallSchedule.createFromJson(ws_event.message, false)
 
-                .then((doc) => console.log("Document saved:", doc))
-                .catch((err) => console.error("Error saving document:", err));
+          //       .then((doc) => console.log("Document saved:", doc))
+          //       .catch((err) => console.error("Error saving document:", err));
 
-              // saveUnSendedMessage(ws_event.message, ws_event.senderphone, ws_event.recieverphone);
-              console.log(`${ws_event.recieverphone} is offline`);
-            }
-          }
+          //     // saveUnSendedMessage(ws_event.message, ws_event.senderphone, ws_event.recieverphone);
+          //     console.log(`${ws_event.recieverphone} is offline`);
+          //   }
+          // }
         }
       }
     });

@@ -146,14 +146,14 @@ messageSchema.statics.deleteUnReplayedMessage = async function (
       content: message,
     }).sort({ timestamp: -1 });
     if (msg != null) {
-      console.log(`"message found on database " ${msg}`);
+      console.log(`"message found on database for delete`);
       await this.deleteOne({ _id: msg._id });
       var astro = await Astrologist.findOne({ phone: reciever });
       var user = await User.findOne({ phone: sender });
       user.increaseBalance(astro.chatFees);
       await astro.decreaseAChatFee();
     } else {
-      console.log("no message found on database");
+      console.log("no message found on database for delte");
     }
   } catch (error) {
     console.log(error);

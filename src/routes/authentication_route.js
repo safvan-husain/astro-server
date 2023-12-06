@@ -11,14 +11,16 @@ router.post("/login", async (req, res) => {
     if (user == null) {
       res.status(409).json({ message: "No account exist with this phone" });
     } else {
-      if(await Password.comparePasswords(password, user.password)) { 
-        await User.updateToken(req.body);
+      // if(await Password.comparePasswords(password, user.password)) { 
+      //   await User.updateToken(req.body);
+
+      // res.status(200).json(user);
+      // } else {
+      //   res.status(400).json({ message: "Incorrect Password" });
+      // }
+      await User.updateToken(req.body);
 
       res.status(200).json(user);
-      } else {
-        res.status(400).json({ message: "Incorrect Password" });
-      }
-      
     }
   } catch (error) {
     res.status(509).json({ message: "server crash" });

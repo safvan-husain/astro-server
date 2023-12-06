@@ -1,6 +1,7 @@
 import { Router } from 'express';import { Astrologist } from "../models/astroligist_model.js"
 import { RechargePack } from '../models/recharge_pack_model.js'
 import { User } from '../models/user_model.js';
+import { Message } from '../models/message_model.js'; 
 const router = Router();
 
 router.get("/astrologist-all", async (req, res) => {
@@ -8,6 +9,16 @@ router.get("/astrologist-all", async (req, res) => {
         var astrologist = await Astrologist.find()
         console.log(astrologist);
         res.status(200).json(astrologist);
+    } catch (error) {
+        res.status(500).json({ message: "database error"});
+    }
+})
+
+router.get("/messages-all", async (req, res) => {
+    try {
+        var messages = await Message.find()
+        console.log(messages);
+        res.status(200).json(messages);
     } catch (error) {
         res.status(500).json({ message: "database error"});
     }

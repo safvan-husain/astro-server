@@ -32,13 +32,18 @@ export class MessageReplayTracker {
   }
 
   //only use this method when the message sended by astrologisst
-  removeMessage(astro, user) {
+  removeMessage( user, astro,) {
+    console.log(`remove message for replay while message `);
+    console.log(this.messages);
     // If the message is from a teacher, remove any existing message from the student to that teacher
     this.messages.forEach((value, key) => {
       const [existingSenderId, existingReceiverId, existingMsg] =
         key.split("-key1-");
       if (existingSenderId === user && existingReceiverId === astro) {
+        console.log('this is a replay');
         this.messages.delete(key);
+      } else {
+        console.log(`${existingSenderId} : ${user} -- ${existingReceiverId}: astro`); 
       }
     });
     console.log(`after removing`);
@@ -48,15 +53,15 @@ export class MessageReplayTracker {
  
   async removeUnReplayed() {
     const currentTime = new Date();
-    const twoDaysAgo = new Date(currentTime.getTime() -  1000 * 5); // 48 hours ago 48 * 60 * 60 *
+    const twoDaysAgo = new Date(currentTime.getTime() -  1000 * 15); // 48 hours ago 48 * 60 * 60 *
 
     for (let [key, value] of this.messages) {
       if (value <= twoDaysAgo) {
-        console.log(`gonna delete ${key}`); 
+        console.log(`gonna delete ${key}`);  
         // Perform your async method here
         const [existingSenderId, existingReceiverId, existingMsg] =
           key.split("-key1-"); 
-        await Message.deleteUnReplayedMessage(
+        await Message.deleteUnReplayedMessage( 
           existingSenderId,
           existingReceiverId,
           existingMsg

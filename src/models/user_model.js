@@ -19,14 +19,24 @@ const UserSchema = new Schema({
     type: String,
     required: false,
   },
-  birthDate: {
-    type: String,
+  birthDateTime: {
+    type: Number,
     required: true,
   },
-  birthTime: {
-    type: String,
-    required: true,
-  },
+  birthLocation: {
+    name: {
+      type: String, 
+      required: true, 
+    },
+    latitude: {
+      type: Number,
+      required: true,
+    },
+    longitude: {
+      type: Number,
+      required: true,
+    },
+  }, 
   avatarUrl: {
     type: String,
     required: false,
@@ -87,6 +97,7 @@ UserSchema.statics.isUser = async function( phone ) {
 }
 
 UserSchema.methods.updateProfile = async function (data) {
+  console.log(data.birthDateTime);
   Object.assign(this, data);
   return await this.save();
 };
