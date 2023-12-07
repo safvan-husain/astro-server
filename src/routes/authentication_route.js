@@ -9,8 +9,8 @@ const otpService = OtpServices.getInstance();
 router.post("/sendOtp", async (req, res) => {console.log("on send otp");
   const { phone } = req.body;
   try {
-    res.status(200).json({message: "success"});  
-    // await otpService.sendOTP(phone, res);
+    // res.status(200).json({message: "success"});  
+    await otpService.sendOTP(phone, res);
   } catch (error) {
     console.log(error);
   }
@@ -83,8 +83,8 @@ router.get("/log-latest", async (req, res) => {
 router.post("/register", async (req, res) => {
   var otp = req.query.otp;
   console.log(`register called and otp is ${otp}`);
-  // const isValid = otpService.verifyOTP(req.body.phone, otp);
-  const isValid = true ;
+  const isValid = otpService.verifyOTP(req.body.phone, otp);
+  // const isValid = true ;
   if (!isValid) {
     res.status(401).json({ message: "wrong otp" });
   } else {

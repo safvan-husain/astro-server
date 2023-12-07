@@ -49,7 +49,7 @@ export class OtpServices {
                 resolve(res.body);
             });
         });
-        resp.status(200); 
+        resp.status(200).json({message: "success"});  
         console.log(response);
         this.otps.set(phone, `${otp}`);
         return response;
