@@ -1,5 +1,4 @@
 import express from "express";
-import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { authRoutes } from "./src/routes/authentication_route.js";
 import { astrologistAuthRoute } from "./src/routes/astrologist_auth_route.js";
@@ -12,6 +11,7 @@ import { SheduleRoute } from "./src/routes/shedule_route.js";
 import { walletRouter } from "./src/routes/wallet_route.js";import { adminRouter } from "./src/routes/admin_route.js";
 import cors from 'cors';
 import  Razorpay  from 'razorpay'; 
+import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();

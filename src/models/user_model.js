@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { PushNotification } from "../utils/push_notfication.js";
+import { Password } from "../utils/password_hash.js";
 
 const UserSchema = new Schema({
   phone: {
@@ -105,11 +106,13 @@ UserSchema.methods.updateProfile = async function (data) {
 UserSchema.methods.deductFromBalance =async function (amou) {
   var amount = parseFloat(amou);
   if (this.balance < amount) {
-    throw new Error("Insufficient balance");
+    console.log("Insufficient balance");
+    return;
   }
   // console.log(`before deducting ${amou} from ${this.firstname}`);
   this.balance -= amount;
   console.log(`after deducting ${amou} : ${this.balance} from ${this.firstname}`);
+  console.log(this);
   const result = await this.save();
   console.log("Save result:", result);
   
@@ -134,6 +137,8 @@ UserSchema.methods.increaseBalance = async function (amou) {
 };
 
 UserSchema.statics.createProfile =async function (data) {
+  const hashed = await Password.hashPassword(data.password)
+  data.password = hashed;
   const user = new this(data);
   return await user.save();
 };

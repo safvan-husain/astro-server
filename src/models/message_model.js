@@ -111,7 +111,7 @@ messageSchema.statics.saveSendedMessage = async function (
       await user.NotifyMessage(`Message from ${astro.firstName}`, message);
       // await user.deductFromBalance(astro.chatFees);
       // await astro.increaseEarnings(chatFee);
-    }
+    } 
   }
 
   var message = new this({

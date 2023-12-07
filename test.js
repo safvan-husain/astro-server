@@ -1,17 +1,36 @@
-import { RechargePack } from "./src/models/recharge_pack_model.js";
+import fast2sms from "fast-two-sms";
+import dotenv from "dotenv";
+import unirest from "unirest";
 
-async function save() {
-    try {
-        var re1 = await RechargePack.fromJSON({ amount: 100, extraOffer: "Extra 10%" });
-        var re2 = await RechargePack.fromJSON({ amount: 200, extraOffer: "Extra 20%" });
-        var re3 = await RechargePack.fromJSON({ amount: 300 });
-    } catch (error) {
-        console.error(error);
-    }
-}
-save();
+dotenv.config();
 
-export { save }
+const key = process.env.FAST2SMS_KEY_SECRET;
 
-// 2004-02-12T15:19:21+05:30
-// 2023-11-15 00:00:00.000
+  var req = unirest("GET", "https://www.fast2sms.com/dev/bulkV2");
+
+  req.query({
+    "authorization": `${key}`,
+    "variables_values": "5599",
+    "route": "otp",
+    "numbers": "7907320942"
+  });
+  
+  req.headers({
+    "cache-control": "no-cache"
+  });
+  
+  
+  req.end(function (res) {
+    if (res.error) throw new Error(res.error);
+  
+    console.log(res.body);
+  }); 
+
+ 
+
+// fast2sms.sendMessage(options).then(response=> {
+//     console.log(response);
+//     console.log('after response');
+// }).catch(error=> {
+//     console.log(error); 
+// }) 

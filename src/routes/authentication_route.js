@@ -1,8 +1,42 @@
 import { Router } from "express";
 import { User } from "../models/user_model.js";
 import { Password } from "../utils/password_hash.js";
-// import { registerUserDB } from "../utils/db_methods.js";
+import { OtpServices } from "../utils/otp_service.js";
+
 const router = Router();
+const otpService = OtpServices.getInstance();
+
+router.post("/sendOtp", async (req, res) => {
+  const { phone } = req.body;
+  try {
+    await otpService.sendOTP(phone, res);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.get("/forgot", async (req, res) => {
+  const { otp, phone } = req.query;
+  
+})
+
+router.post("/change-password", async (req, res) => {
+  const { phone, password } = req.body;
+  try {
+    var user = await User.findOne({ phone: phone });
+    if (user == null) {
+      res.status(409).json({ message: "No account exist with this phone" });
+    } else {
+      var hashed = await Password.hashPassword(password);
+      user.password = hashed;
+      await user.save();
+      res.status(200).json(user)
+    }
+  } catch (error) {
+    res.status(509).json({ message: "server crash" });   
+    console.log(error);
+  }
+});
 
 router.post("/login", async (req, res) => {
   const { phone, password } = req.body;
@@ -11,19 +45,16 @@ router.post("/login", async (req, res) => {
     if (user == null) {
       res.status(409).json({ message: "No account exist with this phone" });
     } else {
-      // if(await Password.comparePasswords(password, user.password)) { 
-      //   await User.updateToken(req.body);
+      if (await Password.comparePasswords(password, user.password)) {
+        await User.updateToken(req.body);
 
-      // res.status(200).json(user);
-      // } else {
-      //   res.status(400).json({ message: "Incorrect Password" });
-      // }
-      await User.updateToken(req.body);
-
-      res.status(200).json(user);
+        res.status(200).json(user);
+      } else {
+        res.status(400).json({ message: "Incorrect Password" });
+      }
     }
   } catch (error) {
-    res.status(509).json({ message: "server crash" });
+    res.status(509).json({ message: "server crash" });   
     console.log(error);
   }
 
@@ -47,20 +78,12 @@ router.get("/log-latest", async (req, res) => {
 
   // Authentication logic here
 });
-// router.post("/login-firebase", async (req, res) => {
-//   const { phone } = req.body;
-//   var user = await User.findOne({ phone: phone });
-//   if (user == null) {
-//     res.status(409).json({ message: "No account exist with this phone" });
-//   } else {
-//     res.status(200).json(user);
-//   }
-// });
 
 router.post("/register", async (req, res) => {
   var otp = req.query.otp;
-  console.log(`register called and otp is ${otp}`); 
-  if (otp !== "0000") {
+  console.log(`register called and otp is ${otp}`);
+  const isValid = otpService.verifyOTP(req.body.phone, otp);
+  if (!isValid) {
     res.status(401).json({ message: "wrong otp" });
   } else {
     try {
