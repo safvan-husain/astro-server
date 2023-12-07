@@ -6,10 +6,10 @@ import { OtpServices } from "../utils/otp_service.js";
 const router = Router();
 const otpService = OtpServices.getInstance();
 
-router.post("/sendOtp", async (req, res) => {
+router.post("/sendOtp", async (req, res) => {console.log("on send otp");
   const { phone } = req.body;
   try {
-    res.status(200); 
+    res.status(200).json({message: "success"});  
     // await otpService.sendOTP(phone, res);
   } catch (error) {
     console.log(error);
