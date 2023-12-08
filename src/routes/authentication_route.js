@@ -6,20 +6,33 @@ import { OtpServices } from "../utils/otp_service.js";
 const router = Router();
 const otpService = OtpServices.getInstance();
 
-router.post("/sendOtp", async (req, res) => {console.log("on send otp");
+router.post("/sendOtp", async (req, res) => {
+  console.log("on send otp");
   const { phone } = req.body;
   try {
-    // res.status(200).json({message: "success"});  
-    await otpService.sendOTP(phone, res);
+    // res.status(200).json({ message: "success" });
+    await otpService.sendOTP(phone, res); 
   } catch (error) {
     console.log(error);
   }
 });
 
-router.get("/forgot", async (req, res) => {
+router.get("/verify", async (req, res) => {
   const { otp, phone } = req.query;
+  const isValid = otpService.verifyOTP(phone, otp); 
+  // const isValid = false;
+  if (isValid) {
+    var user = await User.findOne({ phone: phone });
+    if(user!=null){
 
-})
+      res.status(200).json(user);
+    }else {
+      res.status(400).json({ message: `No user exist with ${phone}`})
+    }
+  } else {
+    res.status(400).json({ message: "In-correct OTP" });
+  }
+});
 
 router.post("/change-password", async (req, res) => {
   const { phone, password } = req.body;
@@ -31,10 +44,10 @@ router.post("/change-password", async (req, res) => {
       var hashed = await Password.hashPassword(password);
       user.password = hashed;
       await user.save();
-      res.status(200).json(user)
+      res.status(200).json(user);
     }
   } catch (error) {
-    res.status(509).json({ message: "server crash" });   
+    res.status(509).json({ message: "server crash" });
     console.log(error);
   }
 });
@@ -55,7 +68,7 @@ router.post("/login", async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(509).json({ message: "server crash" });   
+    res.status(509).json({ message: "server crash" });
     console.log(error);
   }
 

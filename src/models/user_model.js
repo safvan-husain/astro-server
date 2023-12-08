@@ -49,7 +49,6 @@ const UserSchema = new Schema({
   maritalStatus: {
     type: String,
     enum: ["single", "married", "divorced", "notSpecified"],
-    required: true,
   },
   balance: {
     required: true,

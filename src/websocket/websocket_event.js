@@ -34,5 +34,14 @@ export class WSMessageModel {
   static fromJson(source) {
     return WSMessageModel.fromMap(JSON.parse(source));
   }
+
+  static isValidWSMessageModel(jsonString) {
+    try {
+        const obj = JSON.parse(jsonString);
+        return obj.hasOwnProperty('message') && obj.hasOwnProperty('senderphone') && obj.hasOwnProperty('recieverphone');
+    } catch (e) {
+        return false;
+    }
+}
 }
 

@@ -49,7 +49,8 @@ export function onWebSocket(server) {
         if (obj.share) {
           await Astrologist.recieveProfile(obj);
         } else {
-          var ws_event = WSMessageModel.fromJson(message.utf8Data);
+          if(WSMessageModel.isValidWSMessageModel(message.utf8Data)){
+            var ws_event = WSMessageModel.fromJson(message.utf8Data);
           // if (ws_event.event_type == EventType.message) {
             await messageTracker.onNewMessageOnWS(ws_event);
             // console.log(ws_event.message);
@@ -69,6 +70,10 @@ export function onWebSocket(server) {
                 ws_event.recieverphone
               );
             }
+          } else {
+            console.log("invalid message detected on websocket"); 
+          }
+          
           // } else {
           //   // console.log(ws_event.message);
           //   var receiver = webSockets[ws_event.recieverphone];
