@@ -33,25 +33,6 @@ app.use(userRoute);
 app.use(chatRoute );
 app.use(adminRouter );
 
-// var instance = new Razorpay({
-//   key_id: "rzp_live_F0dFMzGVPToBYe",
-//   key_secret: "FbjqP1s8TUTmWb3YeeGgTjBq" ,
-// });
-
-// instance.payments.all({
-//   from: '2016-08-01',
-//   to: '2026-08-20'
-// }).then((response) => {
-//   console.log('on payment all response');
-//   console.log(response);
-//   // handle success
-// }).catch((error) => {
-//   console.log('on payment all error');
-//   console.log(error);
-//   // handle error
-// })
-
-// setInterval(()=> { console.log("on interval")}, 10000) 
 
 mongoose
   .connect(DB, { useNewUrlParser: true })   

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { RechargePack } from "../models/recharge_pack_model.js";
-import { User } from "../models/user_model.js";
+import { User } from "../models/user_model.js";import { AdminData } from "../models/global_admin_data.js";
 import Razorpay from "razorpay";
 import dotenv from "dotenv";
 const router = Router();
@@ -17,6 +17,20 @@ router.get("/all-packs", async (req, res) => {
     }
   } catch (error) {
     res.status(400).json(JSON.stringify({ message: "server break" }));
+  }
+});
+
+router.get("/get-premium-data", async (req, res) => {
+  try {
+    const data = await AdminData.getPremiumData();
+    if (data) {
+      res.status(200).json(data);
+    } else {
+      res.status(400).json({ message: "No data found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

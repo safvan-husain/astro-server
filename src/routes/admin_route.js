@@ -4,7 +4,7 @@ import { RechargePack } from "../models/recharge_pack_model.js";
 import { User } from "../models/user_model.js";
 import { Message } from "../models/message_model.js";
 import { IssueModel } from "../models/issue_model.js";
-import { ReviewModel } from "../models/day_review_model.js";
+import { ReviewModel } from "../models/day_review_model.js";import { AdminData } from "../models/global_admin_data.js";
 const router = Router();
 
 router.get("/astrologist-all", async (req, res) => {
@@ -14,6 +14,34 @@ router.get("/astrologist-all", async (req, res) => {
     res.status(200).json(astrologist);
   } catch (error) {
     res.status(500).json({ message: "database error" });
+  }
+});
+
+router.put("/update-premium-data", async (req, res) => {
+  try {
+    const { premiumPrice, premiumContent } = req.body;
+    const data = await AdminData.find();
+    if (data.length > 0) {
+      data[0].premiumPrice = premiumPrice;
+      data[0].premiumContent = premiumContent;
+      await data[0].save();
+      res.status(200).json(data[0]);
+    } else {
+      res.status(400).json({ message: "No data found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/get-numbers", async (req, res) => {
+  try {
+    const numbers = await AdminData.getNumbers();
+    res.status(200).json(numbers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
