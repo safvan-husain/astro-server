@@ -8,7 +8,7 @@ export class MessageReplayTracker {
 
   async onNewMessageOnWS(es_event) {
     var isUser = await User.isUser(es_event.senderphone); 
-    console.log(isUser? "this is sended by a user": "this is sender by a astrologist"); 
+    // console.log(isUser? "this is sended by a user"+ es_event.senderphone: "this is sender by a astrologist"+ es_event.senderphone); 
     if (isUser) {
       this.addMessage(
         es_event.senderphone,
@@ -27,7 +27,7 @@ export class MessageReplayTracker {
 
     // Add the new message with timestamp
     this.messages.set(messageKey, timestamp);
-    console.log(`after adding `);
+    console.log(`after adding message to replay tracker`);
     console.log(this.messages);
   }
 

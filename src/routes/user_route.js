@@ -53,7 +53,7 @@ router.post("/astro-details", async (req, res) => {
   const { email } = req.body;
 
   try {
-    var astro = await Astrologist.findOne({ email: email });
+    var astro = await Astrologist.findOne({ phone: email }); 
     if (astro != null) {
       res
         .status(200)

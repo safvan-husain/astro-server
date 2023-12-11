@@ -97,7 +97,6 @@ UserSchema.statics.isUser = async function( phone ) {
 }
 
 UserSchema.methods.updateProfile = async function (data) {
-  console.log(data.birthDateTime);
   Object.assign(this, data);
   return await this.save();
 };
@@ -111,9 +110,7 @@ UserSchema.methods.deductFromBalance =async function (amou) {
   // console.log(`before deducting ${amou} from ${this.firstname}`);
   this.balance -= amount;
   console.log(`after deducting ${amou} : ${this.balance} from ${this.firstname}`);
-  console.log(this);
   const result = await this.save();
-  console.log("Save result:", result);
   
   return result; 
 };

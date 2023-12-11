@@ -13,6 +13,25 @@ router.post("/sendOtp", async (req, res) => {
     // res.status(200).json({ message: "success" });
     await otpService.sendOTP(phone, res); 
   } catch (error) {
+    res.status(509).json({ message: "server crash" });
+    console.log(error);
+  }
+});
+
+router.post("/sendOtp-register", async (req, res) => {
+  console.log("on send otp");
+  const { phone } = req.body;
+  try {
+    var user = await User.findOne({ phone: phone });
+    if(user!=null){
+      res.status(400).json({ message: `user exist with ${phone}`})
+
+    }else {
+      await otpService.sendOTP(phone, res);
+    }
+    // res.status(200).json({ message: "success" });
+  } catch (error) {
+    res.status(509).json({ message: "server crash" });
     console.log(error);
   }
 });
@@ -21,17 +40,23 @@ router.get("/verify", async (req, res) => {
   const { otp, phone } = req.query;
   const isValid = otpService.verifyOTP(phone, otp); 
   // const isValid = false;
-  if (isValid) {
-    var user = await User.findOne({ phone: phone });
-    if(user!=null){
-
-      res.status(200).json(user);
-    }else {
-      res.status(400).json({ message: `No user exist with ${phone}`})
+  try {
+    if (isValid) {
+      var user = await User.findOne({ phone: phone });
+      if(user!=null){
+  
+        res.status(200).json(user);
+      }else {
+        res.status(400).json({ message: `No user exist with ${phone}`})
+      }
+    } else {
+  
+      res.status(400).json({ message: "In-correct OTP" });
     }
-  } else {
-    res.status(400).json({ message: "In-correct OTP" });
+  } catch (error) {
+    res.status(509).json({ message: "server crash" });
   }
+ 
 });
 
 router.post("/change-password", async (req, res) => {
