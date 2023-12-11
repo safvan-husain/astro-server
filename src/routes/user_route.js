@@ -19,15 +19,15 @@ router.get("/all-astrologist", async (req, res) => {
   }
 });
 
-router.post("/rate-astrologist",async (req, res) => {
+router.post("/rate-astrologist", async (req, res) => {
   try {
     await Astrologist.addRating(req.body);
-    res.status(200)
+    res.status(200);
   } catch (error) {
     console.log(error);
-    res.status(500)
+    res.status(500);
   }
-})
+});
 
 router.post("/user-details", async (req, res) => {
   console.log("user-details called");
@@ -53,13 +53,37 @@ router.post("/astro-details", async (req, res) => {
   const { email } = req.body;
 
   try {
-    var astro = await Astrologist.findOne({ phone: email }); 
+    var astro = await Astrologist.findOne({ phone: email });
     if (astro != null) {
-      res
-        .status(200)
-        .json(astro);
+      res.status(200).json(astro);
     } else {
       res.status(400).json({ message: "No astrologist exist" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "server break" });
+  }
+});
+//to check today writed diary or not
+router.get("/reviewd", async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const existingReview = await this.findOne({
+      phone: req.query.phone,
+      date: {
+        $gte: today,
+        $lt: tomorrow,
+      },
+    });
+    if(existingReview) {
+      return true;
+    }else {
+      return false;
     }
   } catch (error) {
     console.log(error);

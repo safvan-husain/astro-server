@@ -21,8 +21,8 @@ router.get("/all-packs", async (req, res) => {
 });
 
 router.post("/recharge", async (req, res) => {
-  console.log("recharge");
   const { phone, amount } = req.body;
+  console.log("recharge", amount);
 
   try {
     var user = await User.findOne({ phone: phone });
