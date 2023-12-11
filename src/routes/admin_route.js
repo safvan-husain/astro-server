@@ -38,7 +38,8 @@ router.put("/update-premium-data", async (req, res) => {
 router.get("/get-numbers", async (req, res) => {
   try {
     const numbers = await AdminData.getNumbers();
-    res.status(200).json(numbers);
+    const totalUsers = await User.countDocuments();
+    res.status(200).json({...numbers, totalUsers});
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
