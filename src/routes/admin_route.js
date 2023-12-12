@@ -4,7 +4,8 @@ import { RechargePack } from "../models/recharge_pack_model.js";
 import { User } from "../models/user_model.js";
 import { Message } from "../models/message_model.js";
 import { IssueModel } from "../models/issue_model.js";
-import { ReviewModel } from "../models/day_review_model.js";import { AdminData } from "../models/global_admin_data.js";
+import { ReviewModel } from "../models/day_review_model.js";
+import { AdminData } from "../models/global_admin_data.js";
 const router = Router();
 
 router.get("/astrologist-all", async (req, res) => {
@@ -17,7 +18,8 @@ router.get("/astrologist-all", async (req, res) => {
   }
 });
 
-router.put("/update-premium-data", async (req, res) => {
+
+router.post("/update-premium-data", async (req, res) => {
   try {
     const { premiumPrice, premiumContent } = req.body;
     const data = await AdminData.find();
@@ -27,7 +29,12 @@ router.put("/update-premium-data", async (req, res) => {
       await data[0].save();
       res.status(200).json(data[0]);
     } else {
-      res.status(400).json({ message: "No data found" });
+      data = new AdminData({
+        premiumPrice: premiumPrice,
+        premiumContent: premiumContent,
+      });
+      await data.save();
+      res.status(200).json(data[0]);
     }
   } catch (error) {
     console.log(error);
@@ -39,7 +46,7 @@ router.get("/get-numbers", async (req, res) => {
   try {
     const numbers = await AdminData.getNumbers();
     const totalUsers = await User.countDocuments();
-    res.status(200).json({...numbers, totalUsers});
+    res.status(200).json({ ...numbers, totalUsers });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

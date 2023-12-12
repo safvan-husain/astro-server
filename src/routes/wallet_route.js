@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { RechargePack } from "../models/recharge_pack_model.js";
-import { User } from "../models/user_model.js";import { AdminData } from "../models/global_admin_data.js";
+import { User } from "../models/user_model.js";
+import { AdminData } from "../models/global_admin_data.js";
 import Razorpay from "razorpay";
 import dotenv from "dotenv";
 const router = Router();
@@ -42,6 +43,7 @@ router.post("/recharge", async (req, res) => {
     var user = await User.findOne({ phone: phone });
     if (user != null) {
       await user.increaseBalance(parseFloat(amount));
+      await AdminData.addTransaction(parseFloat(amount));
       res.status(200).json(user);
     } else {
       res.status(400).json({ message: "could not get packs" });
@@ -82,11 +84,15 @@ router.post("/recharge-order", async (req, res) => {
   }
 });
 router.get("/subscribe", async (req, res) => {
-  const { phone } = req.query; 
+  const { phone } = req.query;
   console.log(`subscribe by ${phone}`);
   try {
     var user = await User.findOne({ phone: phone });
     if (user) {
+      var price =  await AdminData.getPremiumPrice();
+      if(price!=null && user.isSubscribed === false) { 
+       user.balance -= price;
+      }
       user.isSubscribed = true;
       await user.save();
       res.status(200).json(user);
