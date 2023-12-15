@@ -54,7 +54,8 @@ adminDataSchema.statics.getNumbers = async function () {
     return {
       revenue: data[0].revenue,
       number_of_transactions: data[0].number_of_transactions,
-      isRazorpay: data[0].isRazorpay
+      isRazorpay: data[0].isRazorpay,
+      number_of_api_calls: data[0].number_of_api_calls
     };
   }
   data = new this({});
