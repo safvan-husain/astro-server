@@ -180,7 +180,7 @@ router.post("/add-pack", async (req, res) => {
   console.log("add pack");
   try {
     await RechargePack.fromJSON(req.body);
-  } catch (error) {}
+  } catch (error) {console.log(error);}
 });
 
 router.post("/delete-pack", async (req, res) => {
