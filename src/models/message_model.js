@@ -2,6 +2,13 @@ import mongoose, { Schema } from "mongoose";
 import { User } from "./user_model.js";
 import { Astrologist } from "./astroligist_model.js";
 
+function getCurrentIST() {
+  var currentIST = new Date();
+  currentIST.setHours(currentIST.getHours() + 5);
+  currentIST.setMinutes(currentIST.getMinutes() + 30);
+  return currentIST;
+}
+
 const messageSchema = new Schema({
   senderEmail: {
     type: String,
@@ -21,7 +28,7 @@ const messageSchema = new Schema({
   },
   timestamp: {
     type: Date,
-    default: Date.now, 
+    default: getCurrentIST,  
   },
 });
 

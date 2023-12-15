@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { Astrologist } from "../models/astroligist_model.js";
 import { User } from "../models/user_model.js";
+import { AdminData } from "../models/global_admin_data.js";
 import dotenv from "dotenv";
 dotenv.config();
 const router = Router();
@@ -10,6 +11,16 @@ const secret = process.env.PROKERALA_SECRET;
 
 const userId = process.env.ASTROLOGY_API_USER_ID;
 const password = process.env.ASTROLOGY_API_PASSWORD;
+
+
+router.get('/banner', async (req, res) => {
+  try {
+    var data = await AdminData.find();
+    res.status(200).json(data[0].banner);  
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 router.get("/all-astrologist", async (req, res) => {
   console.log("as astro called");

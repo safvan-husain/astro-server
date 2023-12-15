@@ -8,6 +8,40 @@ import { ReviewModel } from "../models/day_review_model.js";
 import { AdminData } from "../models/global_admin_data.js";
 const router = Router();
 
+
+router.post('/edit-user', async (req, res) => {
+  const { phone, ...data } = req.body;
+  try {
+    const user = await User.findOne({ phone: phone });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    Object.assign(user, data);
+    await user.save();
+    res.status(200).json({ message: 'User updated successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+router.post('/add-banner', async (req, res) => {
+  try {
+    await AdminData.addBanner(req.body);
+    res.status(200).json({ message: 'Banner added successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/delete-banner', async (req, res) => {
+  try {
+    await AdminData.deleteBanner(req.body.image);
+    res.status(200).json({ message: 'Banner deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get("/astrologist-all", async (req, res) => {
   try {
     var astrologist = await Astrologist.find();

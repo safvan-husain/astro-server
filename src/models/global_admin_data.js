@@ -13,7 +13,32 @@ const adminDataSchema = new mongoose.Schema({
     },
   ],
   isRazorpay: { type: Boolean, default: true },
+  banner: [
+    {
+      image: { type: String, required: true },
+      link: { type: String, default: "" },
+    },
+  ],
 });
+
+adminDataSchema.statics.addBanner = async function (obj) {
+  let data = await this.find();
+  if (data.length > 0) {
+    data[0].banner.push(obj);
+    await data[0].save();
+  } else {
+    data = new this({ banner: [obj] });
+    await data.save();
+  }
+};
+
+adminDataSchema.statics.deleteBanner = async function (image) {
+  let data = await this.find();
+  if (data.length > 0) {
+    data[0].banner = data[0].banner.filter(banner => banner.image !== image);
+    await data[0].save();
+  }
+};
 
 adminDataSchema.statics.increaseApiCalls = async function () {
   let data = await this.find();
@@ -55,7 +80,7 @@ adminDataSchema.statics.getNumbers = async function () {
       revenue: data[0].revenue,
       number_of_transactions: data[0].number_of_transactions,
       isRazorpay: data[0].isRazorpay,
-      number_of_api_calls: data[0].number_of_api_calls
+      number_of_api_calls: data[0].number_of_api_calls,
     };
   }
   data = new this({});
@@ -71,7 +96,8 @@ adminDataSchema.statics.updateData = async function (updateObj) {
     "premiumPrice",
     "premiumContent",
     "revenue",
-    "number_of_transactions","isRazorpay",
+    "number_of_transactions",
+    "isRazorpay",
   ];
   const keys = Object.keys(updateObj);
 
