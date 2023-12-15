@@ -18,6 +18,21 @@ router.get("/astrologist-all", async (req, res) => {
   }
 });
 
+router.post('/update-payment', async (req, res) => {
+  const { isRazorpay } = req.body;
+
+  if (isRazorpay === undefined) {
+      return res.status(400).send({ error: 'isRazorpay value is required' });
+  }
+
+  try {
+      await AdminData.updateData({ isRazorpay });
+      res.status(200).send({ message: 'isRazorpay value updated successfully' });
+  } catch (error) {
+      res.status(500).send({ error: 'An error occurred while updating isRazorpay value' });
+  }
+});
+
 
 router.post("/update-premium-data", async (req, res) => {
   try {

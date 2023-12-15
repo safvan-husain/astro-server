@@ -1,7 +1,15 @@
 import { Router } from "express";
 import { Astrologist } from "../models/astroligist_model.js";
 import { User } from "../models/user_model.js";
+import dotenv from "dotenv";
+dotenv.config();
 const router = Router();
+
+const apikey = process.env.PROKERALA_KEY;
+const secret = process.env.PROKERALA_SECRET;
+
+const userId = process.env.ASTROLOGY_API_USER_ID;
+const password = process.env.ASTROLOGY_API_PASSWORD;
 
 router.get("/all-astrologist", async (req, res) => {
   console.log("as astro called");
@@ -12,6 +20,34 @@ router.get("/all-astrologist", async (req, res) => {
       res.status(200).json(astrologists);
     } else {
       res.status(400).json({ message: "No astrologist exist" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "server break" });
+  }
+});
+
+router.get("/prokerala-credentials", async (req, res) => {
+  console.log("prokerala");
+  try {
+    if (apikey === undefined || secret === undefined) {
+      res.status(500).json({ message: "prokerala credentials undefined" });
+    } else {
+      res.status(200).json({ apiid: apikey, secret: secret });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "server break" });
+  }
+});
+
+router.get("/astrology-credentials", async (req, res) => {
+  console.log("prokerala");
+  try {
+    if (userId === undefined || password === undefined) {
+      res.status(500).json({ message: "astrology credentials undefined" });
+    } else {
+      res.status(200).json({ userId: userId, password: password });
     }
   } catch (error) {
     console.log(error);
@@ -48,12 +84,12 @@ router.post("/user-details", async (req, res) => {
   }
 });
 
-router.post("/astro-details", async (req, res) => {
+router.get("/astro-details", async (req, res) => { 
   console.log("astro-details called");
-  const { email } = req.body;
+  const { phone } = req.query;
 
   try {
-    var astro = await Astrologist.findOne({ phone: email });
+    var astro = await Astrologist.findOne({ phone: phone });
     if (astro != null) {
       res.status(200).json(astro);
     } else {
@@ -80,9 +116,9 @@ router.get("/reviewd", async (req, res) => {
         $lt: tomorrow,
       },
     });
-    if(existingReview) {
+    if (existingReview) {
       return true;
-    }else {
+    } else {
       return false;
     }
   } catch (error) {

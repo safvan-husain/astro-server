@@ -2,11 +2,13 @@ import { Router } from "express";
 import { RechargePack } from "../models/recharge_pack_model.js";
 import { User } from "../models/user_model.js";
 import { AdminData } from "../models/global_admin_data.js";
-import Razorpay from "razorpay";
+import { payWithRazorPay, payWithPhonePe } from "../utils/payment_methods.js";
+
 import dotenv from "dotenv";
+dotenv.config();
+
 const router = Router();
 
-dotenv.config();
 
 router.get("/all-packs", async (req, res) => {
   try {
@@ -56,28 +58,17 @@ router.post("/recharge", async (req, res) => {
 
 router.post("/recharge-order", async (req, res) => {
   console.log("recharge order");
-  const { amount } = req.body;
+  var { amount } = req.body;
+//amount in smallest currency unit.
+  amount = Number.parseInt(amount) * 100; 
 
   try {
-    var instance = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET,
-    });
-
-    var options = {
-      amount: Number.parseInt(amount) * 100, // amount in the smallest currency unit
-      currency: "INR",
-      receipt: "order_rcptid_11",
-    };
-    instance.orders
-      .create(options)
-      .then((order) => {
-        res.status(200).json(order);
-      })
-      .catch((error) => {
-        console.log(err);
-        res.status(500).json({ message: "failed to create order!" });
-      });
+    var isRazorpay = await AdminData.isRazorpay();
+    if (isRazorpay) {
+      await payWithRazorPay(amount, res);
+    } else {
+      payWithPhonePe(amount, res);
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json(JSON.stringify({ message: "server break" }));
@@ -89,9 +80,9 @@ router.get("/subscribe", async (req, res) => {
   try {
     var user = await User.findOne({ phone: phone });
     if (user) {
-      var price =  await AdminData.getPremiumPrice();
-      if(price!=null && user.isSubscribed === false) { 
-       user.balance -= price;
+      var price = await AdminData.getPremiumPrice();
+      if (price != null && user.isSubscribed === false) {
+        user.balance -= price;
       }
       user.isSubscribed = true;
       await user.save();
