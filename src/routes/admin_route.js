@@ -146,6 +146,19 @@ router.get("/all-chat", async (req, res) => {
   }
 });
 
+router.get("/last-user-visit", async (req, res) => {
+  const { phone } = req.query;
+  try {
+    await Message.updateMany(
+      { receiverPhone: "admin", senderPhone: phone },
+      { $set: { isSendToReciever: true } }
+    );
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "server crash" });
+  }
+})
+
 router.get("/chat", async (req, res) => {
   const { phone } = req.query;
   try {
