@@ -9,46 +9,45 @@ import { userRoute } from "./src/routes/user_route.js";
 import { chatRoute } from "./src/routes/chat_route.js";
 import { SheduleRoute } from "./src/routes/shedule_route.js";
 import { notificationRoutes } from "./src/routes/notification_route.js";
-import { walletRouter } from "./src/routes/wallet_route.js";import { adminRouter } from "./src/routes/admin_route.js";
-import cors from 'cors';
-import  Razorpay  from 'razorpay'; 
+import { walletRouter } from "./src/routes/wallet_route.js";
+import { adminRouter } from "./src/routes/admin_route.js";
+import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const server = http.createServer(app); 
+const server = http.createServer(app);
 
 const port = process.env.PORT || 3000;
 
-const DB = process.env.DataBase; 
+const DB = process.env.DataBase;
 
-app.use(bodyParser.json()); 
-app.use(cors()); 
+app.use(bodyParser.json());
+app.use(cors());
 app.use(authRoutes);
 app.use(notificationRoutes);
-app.use(walletRouter  );
+app.use(walletRouter);
 app.use(SheduleRoute);
 app.use(astrologistAuthRoute);
 app.use(userRoute);
-app.use(chatRoute );
-app.use(adminRouter );
-
+app.use(chatRoute);
+app.use(adminRouter);
 
 mongoose
-  .connect(DB, { useNewUrlParser: true })   
+  .connect(DB, { useNewUrlParser: true })
   .then(() => {
     console.log("connected to database");
-  }) 
+  })
   .catch((e) => {
     console.log(e);
   });
 
 app.get("/", (req, res) => {
-  res.send("Hello World!"); 
+  res.send("Hello World!");
 });
 
 server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
 
-onWebSocket(server);  
+onWebSocket(server);

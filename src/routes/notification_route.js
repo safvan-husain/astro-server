@@ -6,6 +6,7 @@ const router = Router();
 router.post('/general-notification', async (req, res) => {
     const { title, description } = req.body;
     const notification = new Notification({ title, description });
+    await Notification.createNotification(req.body);
     try {
         await notification.save();
         res.status(200).json({ message : "success"});
@@ -17,6 +18,7 @@ router.post('/general-notification', async (req, res) => {
 router.post('/notification', async (req, res) => {
     const { title, description, phone } = req.body;
     const notification = new Notification({ title, description, to: phone });
+    await Notification.createNotification(req.body);
     try {
         await notification.save();
         res.status(200).json({ message : "success"});

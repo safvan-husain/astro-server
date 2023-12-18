@@ -10,15 +10,15 @@ function getCurrentIST() {
 }
 
 const messageSchema = new Schema({
-  senderEmail: {
+  senderPhone: {
     type: String,
     required: true,
   },
-  receiverEmail: {
+  receiverPhone: {
     type: String,
     required: true,
   },
-  content: {
+  content: { 
     type: String,
     required: true,
   },
@@ -31,6 +31,20 @@ const messageSchema = new Schema({
     default: getCurrentIST,  
   },
 });
+
+
+messageSchema.statics.getMessagesByPhone = async function(phone) {
+  const messages = await this.find({
+    $or: [{ senderPhone: phone }, { receiverPhone: phone }]
+  });
+
+  return messages.map(message => ({
+    text: message.content,
+    isSentByMe: message.senderPhone === phone,
+    chatId: "admin",
+    timestamp: message.timestamp.toISOString(),
+  }));
+};
 
 messageSchema.statics.saveUnSendedMessage = async function (
   message,
@@ -56,8 +70,8 @@ messageSchema.statics.saveUnSendedMessage = async function (
   if (user != null && astro != null) {
     //if the sender is user send notification to astro
     await astro.NotifyMessage(`Message from ${user.firstname}`, message);
-    await user.deductFromBalance(astro.chatFees);
-    await astro.increaseEarnings(); 
+    // await user.deductFromBalance(astro.chatFees); 
+    // await astro.increaseEarnings(); 
   } else {
     //if the sender is astrologist send notification to user
     user = await User.findOne({ phone: reciever });
@@ -70,8 +84,8 @@ messageSchema.statics.saveUnSendedMessage = async function (
     }
   }
   var message = new this({
-    senderEmail: sender,
-    receiverEmail: reciever,
+    senderPhone: sender,
+    receiverPhone: reciever,
     isSendToReciever: false,
     content: message,
   });
@@ -107,8 +121,8 @@ messageSchema.statics.saveSendedMessage = async function (
   if (user != null && astro != null) {
     //if the sender is user send notification to astro
     await astro.NotifyMessage(`Message from ${user.firstname}`, message);
-    await user.deductFromBalance(astro.chatFees);
-    await astro.increaseEarnings();
+    // await user.deductFromBalance(astro.chatFees);
+    // await astro.increaseEarnings();
   } else {
     //if the sender is astrologist send notification to user
     user = await User.findOne({ phone: reciever });
@@ -122,8 +136,8 @@ messageSchema.statics.saveSendedMessage = async function (
   }
 
   var message = new this({
-    senderEmail: sender,
-    receiverEmail: reciever,
+    senderPhone: sender,
+    receiverPhone: reciever,
     isSendToReciever: true,
     content: message,
   });
@@ -135,37 +149,37 @@ messageSchema.statics.saveSendedMessage = async function (
   }
 };
 
-messageSchema.statics.deleteUnReplayedMessage = async function (
-  sender,
-  reciever,
-  message
-) {
-  console.log(`'deleteing message  ${sender} ${reciever} ${message}`);
-  if (!message || !sender || !reciever) {
-    throw new Error(
-      `Null Argument: ${!message ? "message" : !sender ? "sender" : "reciever"}`
-    );
-  }
-  try {
-    var msg = await this.findOne({
-      senderEmail: sender,
-      receiverEmail: reciever,
-      content: message,
-    }).sort({ timestamp: -1 });
-    if (msg != null) {
-      console.log(`"message found on database for delete`);
-      await this.deleteOne({ _id: msg._id });
-      var astro = await Astrologist.findOne({ phone: reciever });
-      var user = await User.findOne({ phone: sender });
-      user.increaseBalance(astro.chatFees);
-      await astro.decreaseAChatFee();
-    } else {
-      console.log("no message found on database for delte");
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
+// messageSchema.statics.deleteUnReplayedMessage = async function (
+//   sender,
+//   reciever,
+//   message
+// ) {
+//   console.log(`'deleteing message  ${sender} ${reciever} ${message}`);
+//   if (!message || !sender || !reciever) {
+//     throw new Error(
+//       `Null Argument: ${!message ? "message" : !sender ? "sender" : "reciever"}`
+//     );
+//   }
+//   try {
+//     var msg = await this.findOne({
+//       senderPhone: sender,
+//       receiverPhone: reciever,
+//       content: message,
+//     }).sort({ timestamp: -1 });
+//     if (msg != null) {
+//       console.log(`"message found on database for delete`);
+//       await this.deleteOne({ _id: msg._id });
+//       var astro = await Astrologist.findOne({ phone: reciever });
+//       var user = await User.findOne({ phone: sender });
+//       user.increaseBalance(astro.chatFees);
+//       await astro.decreaseAChatFee();
+//     } else {
+//       console.log("no message found on database for delte");
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 const Message = mongoose.model("Message", messageSchema);
 

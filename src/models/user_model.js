@@ -72,6 +72,20 @@ UserSchema.methods.NotifyMessage = async function (title, content) {
   });
 };
 
+UserSchema.statics.notifyAllUsers = async function (title, content) {
+  const users = await this.find({});
+  const pushNotification = new PushNotification();
+  for (let user of users) {
+    if (user.token) {
+      await pushNotification.sendMessage({
+        token: user.token,
+        title: title,
+        message: content,
+      });
+    }
+  }
+};
+
 UserSchema.statics.updateToken = async function (data) {
   const { phone, token } = data;
   if (token != null) {
