@@ -106,40 +106,47 @@ router.get("/all-chat", async (req, res) => {
   try {
     const adminPhone = "admin"; // replace with actual admin phone
 
+    var astro = await Astrologist.findOne({ phone: adminPhone});
+
     // Find users who have sent unsent messages to admin
-    var usersUnsentAdmin = await User.find({
-      phone: {
-        $in: await Message.find({
-          receiverEmail: adminPhone,
-          isSendToReciever: false,
-        }).distinct("senderEmail"),
-      },
-    }).sort({ isSubscribed: -1 });
-
-    // Add isThereNewMessage property
-    usersUnsentAdmin = usersUnsentAdmin.map((user) => {
-      const userObj = user.toObject();
-      userObj.isThereNewMessage = true;
-      return userObj;
-    });
-
-    // Find users who haven't sent unsent messages to admin
-    var usersSentAdmin = await User.find({
-      phone: { $nin: usersUnsentAdmin.map((user) => user.phone) },
-    }).sort({ isSubscribed: -1 });
-
-    // Add isThereNewMessage property
-    usersSentAdmin = usersSentAdmin.map((user) => {
-      const userObj = user.toObject();
-      userObj.isThereNewMessage = false;
-      return userObj;
-    });
-
-    // Concatenate all user lists
-    const users = [...usersUnsentAdmin, ...usersSentAdmin];
-    console.log(users);
-
-    res.status(200).json(users);
+    if(astro) {
+      var usersUnsentAdmin = await User.find({
+        phone: {
+          $in: await Message.find({
+            receiver: astro._id,
+            isSendToReciever: false,
+          }).distinct("senderEmail"),
+        },
+      }).sort({ isSubscribed: -1 });
+  
+      // Add isThereNewMessage property
+      usersUnsentAdmin = usersUnsentAdmin.map((user) => {
+        const userObj = user.toObject();
+        userObj.isThereNewMessage = true;
+        return userObj;
+      });
+  
+      // Find users who haven't sent unsent messages to admin
+      var usersSentAdmin = await User.find({
+        phone: { $nin: usersUnsentAdmin.map((user) => user.phone) },
+      }).sort({ isSubscribed: -1 });
+  
+      // Add isThereNewMessage property
+      usersSentAdmin = usersSentAdmin.map((user) => {
+        const userObj = user.toObject();
+        userObj.isThereNewMessage = false;
+        return userObj;
+      });
+  
+      // Concatenate all user lists
+      const users = [...usersUnsentAdmin, ...usersSentAdmin];
+      console.log(users);
+  
+      res.status(200).json(users);
+    } else {
+      res.status(500).json({ messages: "no astrologist on all chat admin route"})
+    }
+   
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "database error" });
@@ -149,10 +156,14 @@ router.get("/all-chat", async (req, res) => {
 router.get("/last-user-visit", async (req, res) => {
   const { phone } = req.query;
   try {
-    await Message.updateMany(
-      { receiverPhone: "admin", senderPhone: phone },
-      { $set: { isSendToReciever: true } }
-    );
+    var user = await User.findOne({ phone: phone});
+    if(user!=null) {
+      await Message.updateMany(
+        { sender: user._id },
+        { $set: { isSendToReciever: true } }
+      );
+
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "server crash" });
@@ -162,15 +173,17 @@ router.get("/last-user-visit", async (req, res) => {
 router.get("/chat", async (req, res) => {
   const { phone } = req.query;
   try {
+    var user = await User.findOne({ phone: phone });
+   if(user) {
     var messages = await Message.find({
-      $or: [{ senderEmail: phone }, { receiverEmail: phone }],
+      $or: [{ sender: user._id }, { receiver: user._id }],
     });
-    await Message.updateMany(
-      { receiverEmail: phone },
-      { $set: { isSendToReciever: true } }
-    );
+  
     // console.log(messages);
     res.status(200).json(messages);
+   } else {
+    res.status(500).json({ message: "No user with this phone" });
+   }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "database error" });

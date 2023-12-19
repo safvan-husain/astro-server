@@ -43,17 +43,26 @@ const messageSchema = new Schema({
 });
 
 
-messageSchema.statics.getMessagesByPhone = async function(phone) {
-  const messages = await this.find({
-    $or: [{ senderPhone: phone }, { receiverPhone: phone }]
-  });
 
-  return messages.map(message => ({
-    text: message.content,
-    isSentByMe: message.senderPhone === phone,
-    chatId: "admin",
-    timestamp: message.timestamp.toISOString(),
-  }));
+
+messageSchema.statics.getMessagesByPhone = async function(phone) {
+
+  var user = await User.findOne({ phone: phone});
+  if(user!=null) {
+    const messages = await this.find({
+      $or: [{ sender: user._id }, { receiver: user._id }]
+    });
+  
+    return messages.map(message => ({
+      text: message.content,
+      isSentByMe: message.sender.equals(user._id),
+      chatId: "admin",
+      timestamp: message.timestamp.toISOString(),
+    }));
+  } else {
+    console.log("user is null in getmessagebyphone message model");
+  }
+  
 };
 
 messageSchema.statics.saveUnSendedMessage = async function (
@@ -89,8 +98,6 @@ messageSchema.statics.saveUnSendedMessage = async function (
       sender: user._id,
       receiver: astro._id,
     });
-    // await user.deductFromBalance(astro.chatFees); 
-    // await astro.increaseEarnings(); 
   } else {
     //if the sender is astrologist send notification to user
     user = await User.findOne({ phone: reciever });
@@ -98,8 +105,6 @@ messageSchema.statics.saveUnSendedMessage = async function (
 
     if (user != null && astro != null) {
       await user.NotifyMessage(`Message from ${astro.firstName}`, message);
-      // await user.deductFromBalance(chatFee);
-      // await astro.increaseEarnings(chatFee);
       var message = new this({
         senderPhone: sender,
         receiverPhone: reciever,
@@ -143,8 +148,6 @@ messageSchema.statics.saveSendedMessage = async function (
   if (user != null && astro != null) {
     //if the sender is user send notification to astro
     await astro.NotifyMessage(`Message from ${user.firstname}`, message);
-    // await user.deductFromBalance(astro.chatFees);
-    // await astro.increaseEarnings();
     var message = new this({
       senderPhone: sender,
       receiverPhone: reciever,
@@ -160,8 +163,6 @@ messageSchema.statics.saveSendedMessage = async function (
 
     if (user != null && astro != null) {
       await user.NotifyMessage(`Message from ${astro.firstName}`, message);
-      // await user.deductFromBalance(astro.chatFees);
-      // await astro.increaseEarnings(chatFee);
       var message = new this({
         senderPhone: sender,
         receiverPhone: reciever,
@@ -186,38 +187,6 @@ messageSchema.statics.saveSendedMessage = async function (
     console.log(error);
   }
 };
-
-// messageSchema.statics.deleteUnReplayedMessage = async function (
-//   sender,
-//   reciever,
-//   message
-// ) {
-//   console.log(`'deleteing message  ${sender} ${reciever} ${message}`);
-//   if (!message || !sender || !reciever) {
-//     throw new Error(
-//       `Null Argument: ${!message ? "message" : !sender ? "sender" : "reciever"}`
-//     );
-//   }
-//   try {
-//     var msg = await this.findOne({
-//       senderPhone: sender,
-//       receiverPhone: reciever,
-//       content: message,
-//     }).sort({ timestamp: -1 });
-//     if (msg != null) {
-//       console.log(`"message found on database for delete`);
-//       await this.deleteOne({ _id: msg._id });
-//       var astro = await Astrologist.findOne({ phone: reciever });
-//       var user = await User.findOne({ phone: sender });
-//       user.increaseBalance(astro.chatFees);
-//       await astro.decreaseAChatFee();
-//     } else {
-//       console.log("no message found on database for delte");
-//     }
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
 
 const Message = mongoose.model("Message", messageSchema);
 
