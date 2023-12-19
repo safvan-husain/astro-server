@@ -8,35 +8,34 @@ import { ReviewModel } from "../models/day_review_model.js";
 import { AdminData } from "../models/global_admin_data.js";
 const router = Router();
 
-
-router.post('/edit-user', async (req, res) => {
+router.post("/edit-user", async (req, res) => {
   const { phone, ...data } = req.body;
   try {
     const user = await User.findOne({ phone: phone });
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
     Object.assign(user, data);
     await user.save();
-    res.status(200).json({ message: 'User updated successfully' });
+    res.status(200).json({ message: "User updated successfully" });
   } catch (error) {
-    res.status(500).json({ error: 'Something went wrong' });
+    res.status(500).json({ error: "Something went wrong" });
   }
 });
 
-router.post('/add-banner', async (req, res) => {
+router.post("/add-banner", async (req, res) => {
   try {
     await AdminData.addBanner(req.body);
-    res.status(200).json({ message: 'Banner added successfully' });
+    res.status(200).json({ message: "Banner added successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-router.delete('/delete-banner', async (req, res) => {
+router.delete("/delete-banner", async (req, res) => {
   try {
     await AdminData.deleteBanner(req.body.image);
-    res.status(200).json({ message: 'Banner deleted successfully' });
+    res.status(200).json({ message: "Banner deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -52,21 +51,22 @@ router.get("/astrologist-all", async (req, res) => {
   }
 });
 
-router.post('/update-payment', async (req, res) => {
+router.post("/update-payment", async (req, res) => {
   const { isRazorpay } = req.body;
 
   if (isRazorpay === undefined) {
-      return res.status(400).send({ error: 'isRazorpay value is required' });
+    return res.status(400).send({ error: "isRazorpay value is required" });
   }
 
   try {
-      await AdminData.updateData({ isRazorpay });
-      res.status(200).send({ message: 'isRazorpay value updated successfully' });
+    await AdminData.updateData({ isRazorpay });
+    res.status(200).send({ message: "isRazorpay value updated successfully" });
   } catch (error) {
-      res.status(500).send({ error: 'An error occurred while updating isRazorpay value' });
+    res
+      .status(500)
+      .send({ error: "An error occurred while updating isRazorpay value" });
   }
 });
-
 
 router.post("/update-premium-data", async (req, res) => {
   try {
@@ -106,10 +106,10 @@ router.get("/all-chat", async (req, res) => {
   try {
     const adminPhone = "admin"; // replace with actual admin phone
 
-    var astro = await Astrologist.findOne({ phone: adminPhone});
+    var astro = await Astrologist.findOne({ phone: adminPhone });
 
     // Find users who have sent unsent messages to admin
-    if(astro) {
+    if (astro) {
       var usersUnsentAdmin = await User.find({
         phone: {
           $in: await Message.find({
@@ -118,35 +118,36 @@ router.get("/all-chat", async (req, res) => {
           }).distinct("senderEmail"),
         },
       }).sort({ isSubscribed: -1 });
-  
+
       // Add isThereNewMessage property
       usersUnsentAdmin = usersUnsentAdmin.map((user) => {
         const userObj = user.toObject();
         userObj.isThereNewMessage = true;
         return userObj;
       });
-  
+
       // Find users who haven't sent unsent messages to admin
       var usersSentAdmin = await User.find({
         phone: { $nin: usersUnsentAdmin.map((user) => user.phone) },
       }).sort({ isSubscribed: -1 });
-  
+
       // Add isThereNewMessage property
       usersSentAdmin = usersSentAdmin.map((user) => {
         const userObj = user.toObject();
         userObj.isThereNewMessage = false;
         return userObj;
       });
-  
+
       // Concatenate all user lists
       const users = [...usersUnsentAdmin, ...usersSentAdmin];
       console.log(users);
-  
+
       res.status(200).json(users);
     } else {
-      res.status(500).json({ messages: "no astrologist on all chat admin route"})
+      res
+        .status(500)
+        .json({ messages: "no astrologist on all chat admin route" });
     }
-   
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "database error" });
@@ -156,34 +157,33 @@ router.get("/all-chat", async (req, res) => {
 router.get("/last-user-visit", async (req, res) => {
   const { phone } = req.query;
   try {
-    var user = await User.findOne({ phone: phone});
-    if(user!=null) {
+    var user = await User.findOne({ phone: phone });
+    if (user != null) {
       await Message.updateMany(
         { sender: user._id },
         { $set: { isSendToReciever: true } }
       );
-
     }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "server crash" });
   }
-})
+});
 
 router.get("/chat", async (req, res) => {
   const { phone } = req.query;
   try {
     var user = await User.findOne({ phone: phone });
-   if(user) {
-    var messages = await Message.find({
-      $or: [{ sender: user._id }, { receiver: user._id }],
-    });
-  
-    // console.log(messages);
-    res.status(200).json(messages);
-   } else {
-    res.status(500).json({ message: "No user with this phone" });
-   }
+    if (user) {
+      var messages = await Message.find({
+        $or: [{ sender: user._id }, { receiver: user._id }],
+      });
+
+      // console.log(messages);
+      res.status(200).json(messages);
+    } else {
+      res.status(500).json({ message: "No user with this phone" });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "database error" });
@@ -200,24 +200,15 @@ router.get("/all-user", async (req, res) => {
     res.status(500).json({ message: "database error" });
   }
 });
-router.get("/details", async (req, res) => {
-  console.log("details called");
-  var obj = {};
+router.get("/user-details", async (req, res) => {
+  const { phone } = req.query;
   try {
-    var users = await User.find();
-
-    obj["userCount"] = users.length;
-
-    var astro = await Astrologist.find();
-
-    obj["astroCount"] = astro.length;
-
-    let total = await Astrologist.getTotalEarningsAndCollected();
-
-    obj["totalEarnings"] = total.totalEarnings;
-    obj["totalCollected"] = total.totalCollected;
-
-    res.status(200).json(obj);
+    var user = await User.findOne({ phone: phone });
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(400).json({ message: "no user exist" });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "database error" });
@@ -240,7 +231,9 @@ router.post("/add-pack", async (req, res) => {
   console.log("add pack");
   try {
     await RechargePack.fromJSON(req.body);
-  } catch (error) {console.log(error);}
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 router.post("/delete-pack", async (req, res) => {
