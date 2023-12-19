@@ -30,6 +30,16 @@ const messageSchema = new Schema({
     type: Date,
     default: getCurrentIST,  
   },
+  sender: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  receiver: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
 });
 
 
@@ -70,6 +80,15 @@ messageSchema.statics.saveUnSendedMessage = async function (
   if (user != null && astro != null) {
     //if the sender is user send notification to astro
     await astro.NotifyMessage(`Message from ${user.firstname}`, message);
+
+    var message = new this({
+      senderPhone: sender,
+      receiverPhone: reciever,
+      isSendToReciever: false,
+      content: message,
+      sender: user._id,
+      receiver: astro._id,
+    });
     // await user.deductFromBalance(astro.chatFees); 
     // await astro.increaseEarnings(); 
   } else {
@@ -81,14 +100,17 @@ messageSchema.statics.saveUnSendedMessage = async function (
       await user.NotifyMessage(`Message from ${astro.firstName}`, message);
       // await user.deductFromBalance(chatFee);
       // await astro.increaseEarnings(chatFee);
+      var message = new this({
+        senderPhone: sender,
+        receiverPhone: reciever,
+        isSendToReciever: false,
+        content: message,
+        sender: astro._id,
+        receiver: user._id,
+      });
     }
   }
-  var message = new this({
-    senderPhone: sender,
-    receiverPhone: reciever,
-    isSendToReciever: false,
-    content: message,
-  });
+
   try {
     await message.save();
   } catch (error) {
@@ -123,6 +145,14 @@ messageSchema.statics.saveSendedMessage = async function (
     await astro.NotifyMessage(`Message from ${user.firstname}`, message);
     // await user.deductFromBalance(astro.chatFees);
     // await astro.increaseEarnings();
+    var message = new this({
+      senderPhone: sender,
+      receiverPhone: reciever,
+      isSendToReciever: false,
+      content: message,
+      sender: user._id,
+      receiver: astro._id, 
+    });
   } else {
     //if the sender is astrologist send notification to user
     user = await User.findOne({ phone: reciever });
@@ -132,6 +162,14 @@ messageSchema.statics.saveSendedMessage = async function (
       await user.NotifyMessage(`Message from ${astro.firstName}`, message);
       // await user.deductFromBalance(astro.chatFees);
       // await astro.increaseEarnings(chatFee);
+      var message = new this({
+        senderPhone: sender,
+        receiverPhone: reciever,
+        isSendToReciever: false,
+        content: message,
+        sender: astro._id,
+        receiver: user._id,
+      });
     } 
   }
 
