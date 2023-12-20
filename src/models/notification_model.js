@@ -13,7 +13,7 @@ const notificationSchema = new mongoose.Schema({
 
 notificationSchema.statics.createNotification = async function(data) {
   // Check if 'to' field exists in the data
-  if (data.phone) {
+  if (data.phone!= undefined) {
     var user = await User.findOne({ phone: phone});
     if(user) {
       user.NotifyMessage(data.title, data.description)
