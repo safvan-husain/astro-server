@@ -44,7 +44,6 @@ router.delete("/delete-banner", async (req, res) => {
 router.get("/astrologist-all", async (req, res) => {
   try {
     var astrologist = await Astrologist.find();
-    console.log(astrologist);
     res.status(200).json(astrologist);
   } catch (error) {
     res.status(500).json({ message: "database error" });
@@ -140,7 +139,6 @@ router.get("/all-chat", async (req, res) => {
 
       // Concatenate all user lists
       const users = [...usersUnsentAdmin, ...usersSentAdmin];
-      console.log(users);
 
       res.status(200).json(users);
     } else {
@@ -179,7 +177,6 @@ router.get("/chat", async (req, res) => {
         $or: [{ sender: user._id }, { receiver: user._id }],
       });
 
-      // console.log(messages);
       res.status(200).json(messages);
     } else {
       res.status(500).json({ message: "No user with this phone" });
@@ -191,10 +188,8 @@ router.get("/chat", async (req, res) => {
 });
 
 router.get("/all-user", async (req, res) => {
-  console.log("all-user called");
   try {
     var astrologist = await User.find();
-    console.log(astrologist);
     res.status(200).json(astrologist);
   } catch (error) {
     res.status(500).json({ message: "database error" });

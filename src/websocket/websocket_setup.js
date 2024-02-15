@@ -1,7 +1,7 @@
 import { server as WebSocketServer } from "websocket";
 import http from "http";
 // import { sendMessage, makeCall } from "./push_notification";
-import { WSMessageModel } from "./websocket_event.js"; 
+import { WSMessageModel } from "./websocket_event.js";
 import { Message } from "../models/message_model.js";
 // import {
 //   saveSendedMessage,
@@ -16,8 +16,8 @@ import { MessageReplayTracker } from "./message_replay_tracker.js";
 export function onWebSocket(server) {
   var webSockets = {};
   var connected_devices = [];
-  var messageTracker = new MessageReplayTracker()
-  
+  var messageTracker = new MessageReplayTracker();
+
   // setInterval(()=> { messageTracker.removeUnReplayed() }, 10000)
 
   const wsServer = new WebSocketServer({
@@ -44,36 +44,43 @@ export function onWebSocket(server) {
 
     connection.on("message", async function (message) {
       if (message.type === "utf8") {
-        console.log(message.utf8Data);
         const obj = JSON.parse(message.utf8Data);
         if (obj.share) {
           await Astrologist.recieveProfile(obj);
         } else {
-          if(WSMessageModel.isValidWSMessageModel(message.utf8Data)){
+          if (WSMessageModel.isValidWSMessageModel(message.utf8Data)) {
             var ws_event = WSMessageModel.fromJson(message.utf8Data);
-          // if (ws_event.event_type == EventType.message) {
+            // if (ws_event.event_type == EventType.message) {
             await messageTracker.onNewMessageOnWS(ws_event);
             // console.log(ws_event.message);
             var receiver = webSockets[ws_event.recieverphone];
             if (receiver != null) {
-              await Message.saveSendedMessage(
+              //only get message if there is enough balance for the user
+              var savedMessage = await Message.saveSendedMessage(
                 ws_event.message,
                 ws_event.senderphone,
                 ws_event.recieverphone
               );
-              receiver.sendUTF(message.utf8Data);
+              if (savedMessage) {
+                receiver.sendUTF(message.utf8Data);
+              }
             } else {
               console.log(`${ws_event.recieverphone} is offline`);
-             await Message.saveUnSendedMessage(
-                ws_event.message,
-                ws_event.senderphone,
-                ws_event.recieverphone
-              );
+
+              try {
+                await Message.saveUnSendedMessage(
+                  ws_event.message,
+                  ws_event.senderphone,
+                  ws_event.recieverphone
+                );
+              } catch (error) {
+                console.log("error saving here at 74 websockrtsetu");
+              }
             }
           } else {
-            console.log("invalid message detected on websocket"); 
+            console.log("invalid message detected on websocket");
           }
-          
+
           // } else {
           //   // console.log(ws_event.message);
           //   var receiver = webSockets[ws_event.recieverphone];
@@ -119,5 +126,4 @@ export function onWebSocket(server) {
 
     // connection.sendUTF(JSON.stringify({ cmd: "connected" }));
   });
-
 }

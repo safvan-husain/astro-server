@@ -35,11 +35,10 @@ router.get("/get-premium-data", async (req, res) => {
     console.log(error);
     res.status(500).json({ message: "Server error" });
   }
-});
+}); 
 
 router.post("/recharge", async (req, res) => {
   const { phone, amount } = req.body;
-  console.log("recharge", amount);
 
   try {
     var user = await User.findOne({ phone: phone });
@@ -74,18 +73,15 @@ router.post("/recharge-order", async (req, res) => {
     res.status(400).json(JSON.stringify({ message: "server break" }));
   }
 });
+
 router.get("/subscribe", async (req, res) => {
   const { phone } = req.query;
   console.log(`subscribe by ${phone}`);
   try {
     var user = await User.findOne({ phone: phone });
     if (user) {
-      var price = await AdminData.getPremiumPrice();
-      if (price != null && user.isSubscribed === false) {
-        user.balance -= price;
-      }
-      user.isSubscribed = true;
-      await user.save();
+      
+      user.subscribe()
       res.status(200).json(user);
     } else {
       console.log("user is null in subscribe");

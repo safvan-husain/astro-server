@@ -87,8 +87,12 @@ messageSchema.statics.saveUnSendedMessage = async function (
   var astro = await Astrologist.findOne({ phone: reciever });
 
   if (user != null && astro != null) {
+    if(user.balance < astro.chatFees){
+      return null;
+    }
     //if the sender is user send notification to astro
     await astro.NotifyMessage(`Message from ${user.firstname}`, message);
+    await user.deductFromBalance(astro.chatFees);
 
     var message = new this({
       senderPhone: sender,
@@ -117,7 +121,7 @@ messageSchema.statics.saveUnSendedMessage = async function (
   }
 
   try {
-    await message.save();
+    return await message.save();
   } catch (error) {
     console.log(error);
   }
@@ -156,6 +160,7 @@ messageSchema.statics.saveSendedMessage = async function (
       sender: user._id,
       receiver: astro._id, 
     });
+    return;//added
   } else {
     //if the sender is astrologist send notification to user
     user = await User.findOne({ phone: reciever });
@@ -172,14 +177,16 @@ messageSchema.statics.saveSendedMessage = async function (
         receiver: user._id,
       });
     } 
+    return;//added
   }
+  console.log("error on the messagemodel");
 
-  var message = new this({
-    senderPhone: sender,
-    receiverPhone: reciever,
-    isSendToReciever: true,
-    content: message,
-  });
+  // var message = new this({
+  //   senderPhone: sender,
+  //   receiverPhone: reciever,
+  //   isSendToReciever: true,
+  //   content: message,
+  // });
 
   try {
     await message.save();

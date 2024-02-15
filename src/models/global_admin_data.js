@@ -54,7 +54,6 @@ adminDataSchema.statics.increaseApiCalls = async function () {
 adminDataSchema.statics.isRazorpay = async function () {
   var data = await this.find();
   if (data.length > 0) {
-    console.log(data[0].isRazorpay);
     return data[0].isRazorpay;
   } else {
     data = new this({});

@@ -13,6 +13,7 @@ import { walletRouter } from "./src/routes/wallet_route.js";
 import { adminRouter } from "./src/routes/admin_route.js";
 import cors from "cors";
 import dotenv from "dotenv";
+import { User } from "./src/models/user_model.js";
 dotenv.config();
 
 const app = express();
@@ -42,7 +43,7 @@ mongoose
     console.log(e);
   });
 
-app.get("/", (req, res) => {
+app.get("/",async (req, res) => {  
   res.send("Hello World!");
 });
 

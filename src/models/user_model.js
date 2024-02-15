@@ -26,8 +26,8 @@ const UserSchema = new Schema({
   },
   birthLocation: {
     name: {
-      type: String, 
-      required: true, 
+      type: String,
+      required: true,
     },
     latitude: {
       type: Number,
@@ -37,7 +37,7 @@ const UserSchema = new Schema({
       type: Number,
       required: true,
     },
-  }, 
+  },
   avatarUrl: {
     type: String,
     required: false,
@@ -57,10 +57,10 @@ const UserSchema = new Schema({
   token: {
     type: String,
   },
-  isSubscribed : {
-    type: Boolean,
-    required: true,
-  }
+  isSubscribed: {
+    type: Date,
+    default: null,
+  },
 });
 
 UserSchema.methods.NotifyMessage = async function (title, content) {
@@ -89,44 +89,38 @@ UserSchema.statics.notifyAllUsers = async function (title, content) {
 UserSchema.statics.updateToken = async function (data) {
   const { phone, token } = data;
   if (token != null) {
-    console.log("token recieved");
-    console.log(token);
     const user = await this.findOne({ phone: phone });
     if (user != null) {
       user.token = token;
       await user.save();
       console.log("token refreshed for a user");
     }
-  } else {
-    console.log("no token in usermodel");
   }
 };
 
-UserSchema.statics.isUser = async function( phone ) {
-  var user = await this.findOne({ phone: phone})
-  if(user!= null) {
+UserSchema.statics.isUser = async function (phone) {
+  var user = await this.findOne({ phone: phone });
+  if (user != null) {
     return true;
   }
   return false;
-}
+};
 
 UserSchema.methods.updateProfile = async function (data) {
   Object.assign(this, data);
   return await this.save();
 };
 
-UserSchema.methods.deductFromBalance =async function (amou) {
+UserSchema.methods.deductFromBalance = async function (amou) {
   var amount = parseFloat(amou);
   if (this.balance < amount) {
     console.log("Insufficient balance");
     return;
   }
-  // console.log(`before deducting ${amou} from ${this.firstname}`);
   this.balance -= amount;
-  console.log(`after deducting ${amou} : ${this.balance} from ${this.firstname}`);
   const result = await this.save();
-  
-  return result; 
+
+  return result;
 };
 
 UserSchema.methods.getProfile = function () {
@@ -146,11 +140,23 @@ UserSchema.methods.increaseBalance = async function (amou) {
   return await this.save();
 };
 
-UserSchema.statics.createProfile =async function (data) {
-  const hashed = await Password.hashPassword(data.password)
+UserSchema.methods.subscribe = function () {
+  const today = new Date();
+  const subscriptionEndDate = new Date(today);
+  subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 1);
+  this.isSubscribed = subscriptionEndDate;
+  return this.save();
+};
+
+UserSchema.statics.createProfile = async function (data) {
+  const hashed = await Password.hashPassword(data.password);
   data.password = hashed;
   const user = new this(data);
   return await user.save();
+};
+
+UserSchema.statics.unsubscribeAllUsers = async function () {
+  await this.updateMany({}, { $set: { isSubscribed: null } });
 };
 
 const User = mongoose.model("User", UserSchema);

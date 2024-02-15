@@ -152,17 +152,14 @@ AstrologistSchema.statics.getTotalEarningsAndCollected = async function () {
 AstrologistSchema.statics.updateToken = async function (data) {
   const { phone, token } = data;
   if (token != null) {
-    console.log("token recieved");
-    console.log(token);
+   
     const astro = await this.findOne({ phone: phone });
     if (astro != null) {
       astro.token = token;
       await astro.save();
       console.log("token refreshed for a astro");
     }
-  } else {
-    console.log("no token in astromodel");
-  }
+  } 
 };
 
 AstrologistSchema.methods.increaseEarnings = async function () {
@@ -187,7 +184,6 @@ AstrologistSchema.methods.publicDetails = function () {
 };
 AstrologistSchema.statics.recieveProfile = async function (data) {
   const { sender, reciever } = data;
-  console.log(sender, reciever);
   const user = await User.findOne({ phone: sender });
   const astrologist = await this.findOne({ phone: reciever });
 

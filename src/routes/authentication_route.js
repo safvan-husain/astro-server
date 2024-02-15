@@ -123,7 +123,7 @@ router.post("/register", async (req, res) => {
   console.log(`register called and otp is ${otp}`);
   const isValid = otpService.verifyOTP(req.body.phone, otp);
   // const isValid = true ;
-  if (!isValid) {
+  if (!isValid) { 
     res.status(401).json({ message: "wrong otp" });
   } else {
     try {

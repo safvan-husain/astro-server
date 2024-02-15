@@ -46,7 +46,7 @@ export function payWithPhonePe(amount, res) {
     body: body,
     checksum: checksum,
     environment: environment,
-    appId: appId,
+    appId:appId===""? null: appId,
     merchantId: merchantId,
   });
 }
